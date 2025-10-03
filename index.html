@@ -923,6 +923,39 @@
       line-height: 1.5;
       margin-top: 0.5rem;
     }
+    .file-item .preview-card {
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%) translateX(20px);
+      background: rgba(20, 20, 20, 0.98);
+      border: 1px solid var(--foreground);
+      padding: 1rem;
+      min-width: 300px;
+      max-width: 400px;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 32px rgba(60, 179, 113, 0.4);
+    }
+    .file-item:hover .preview-card {
+      opacity: 1;
+      transform: translateY(-50%) translateX(10px);
+    }
+    .preview-card .project-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--foreground);
+    }
+    @media (max-width: 768px) {
+      .file-item .preview-card {
+        display: none;
+      }
+    }
     .preview-card img {
       width: 100%;
       height: auto;
@@ -1650,12 +1683,27 @@ God Mode: ON
             <ul class="file-list">
               <li class="file-item executable" onclick="launchTerminal('https://theinventorcenter.com')">🏛️ The Inventor Center
                 <span class="subtext">Makerspace & Innovation Hub - Kingsport, TN</span>
+                <div class="preview-card">
+                  <img src="pix/inventor-center.webp" alt="The Inventor Center" class="project-image">
+                  <h3>The Inventor Center</h3>
+                  <div class="excerpt">Makerspace and innovation hub in Kingsport, TN. A collaborative space for makers, tinkerers, and innovators.</div>
+                </div>
               </li>
               <li class="file-item executable" onclick="launchTerminal('https://aegixlinux.org')">🐧 Aegix Linux
                 <span class="subtext">GNU/Linux distribution built with parsimony</span>
+                <div class="preview-card">
+                  <img src="pix/mr-robot-mask.png" alt="Aegix Linux" class="project-image">
+                  <h3>Aegix Linux</h3>
+                  <div class="excerpt">A GNU/Linux distribution built with love, purpose, and parsimony. Lightweight, developer-focused, and thoughtfully crafted.</div>
+                </div>
               </li>
               <li class="file-item executable" onclick="launchTerminal('https://timbeach.com')">💻 timbeach.com
                 <span class="subtext">Software engineer & GNU/Linux enthusiast</span>
+                <div class="preview-card">
+                  <img src="pix/space-guitar.png" alt="timbeach.com" class="project-image">
+                  <h3>timbeach.com</h3>
+                  <div class="excerpt">Software engineer, GNU/Linux enthusiast, and recording artist. Building things with code and sound.</div>
+                </div>
               </li>
             </ul>
           </div>
