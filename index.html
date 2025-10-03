@@ -1,0 +1,2830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Posix Party - GNU/Linux Meetup in Kingsport, TN</title>
+
+  <!-- Open Graph / Social Media Preview -->
+  <meta property="og:title" content="Posix Party" />
+  <meta property="og:description" content="Monthly GNU/Linux meetup at The Inventor Center in Kingsport, TN - where POSIX compliance is the life of the party" />
+  <meta property="og:url" content="https://posixparty.com" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Posix Party" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Posix Party" />
+  <meta name="twitter:description" content="Monthly GNU/Linux meetup at The Inventor Center in Kingsport, TN - where POSIX compliance is the life of the party" />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="manifest" href="site.webmanifest" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link href="https://api.fontshare.com/v2/css?f%5B%5D=satoshi@300,400,500,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --background: #0a0e0a;
+      --foreground: #3CB371;
+      --highlight: #FFD700;
+      --glow: rgba(60, 179, 113, 0.9);
+      --scanline: rgba(255,255,255,0.04);
+      --marquee-duration: 25s;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(255, 255, 255, 0.02) 50%,
+        transparent 100%
+      );
+      background-size: 100% 3px;
+    }
+
+    .star {
+      position: fixed;
+      border-radius: 50%;
+      z-index: -1;
+      pointer-events: none;
+      transition: transform 0.1s ease-out;
+    }
+
+    .star-emerald { background: #50c878; box-shadow: 0 0 2px #50c878, 0 0 4px #50c878; animation: twinkle 4s infinite ease-in-out; }
+    .star-sapphire { background: #4d9fff; box-shadow: 0 0 2px #4d9fff, 0 0 4px #4d9fff; animation: twinkle 5s infinite ease-in-out; }
+    .star-ruby { background: #ff5577; box-shadow: 0 0 2px #ff5577, 0 0 4px #ff5577; animation: twinkle 3.5s infinite ease-in-out; }
+    .star-amethyst { background: #bb88ff; box-shadow: 0 0 2px #bb88ff, 0 0 4px #bb88ff; animation: twinkle 6s infinite ease-in-out; }
+    .star-topaz { background: #ffd700; box-shadow: 0 0 2px #ffd700, 0 0 4px #ffd700; animation: twinkle 4.5s infinite ease-in-out; }
+    .star-aquamarine { background: #00ffff; box-shadow: 0 0 2px #00ffff, 0 0 4px #00ffff; animation: twinkle 5.5s infinite ease-in-out; }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.5; transform: scale(0.9); }
+      50% { opacity: 0.85; transform: scale(1.2); }
+    }
+
+    /* Parallax depth layers */
+    .star.layer-1 { z-index: -3; }
+    .star.layer-2 { z-index: -2; }
+    .star.layer-3 { z-index: -1; }
+
+    /* Sky info display */
+    .sky-info {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid var(--foreground);
+      padding: 0.75rem 1rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--foreground);
+      z-index: 1000;
+      border-radius: 4px;
+      line-height: 1.6;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+      cursor: help;
+    }
+    .sky-info:hover {
+      opacity: 1;
+    }
+    .sky-info .label {
+      color: var(--highlight);
+      font-weight: bold;
+    }
+    .sky-info .tooltip {
+      position: absolute;
+      left: 100%;
+      bottom: 0;
+      transform: translateX(20px);
+      background: rgba(20, 20, 20, 0.98);
+      border: 2px solid var(--foreground);
+      padding: 1rem;
+      width: 300px;
+      z-index: 1001;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 4px;
+      line-height: 1.5;
+      font-size: 0.85rem;
+      box-shadow: 0 8px 32px rgba(0, 255, 159, 0.3);
+    }
+    .sky-info:hover .tooltip {
+      opacity: 1;
+      transform: translateX(10px);
+    }
+    .tooltip h4 {
+      margin: 0 0 0.5rem 0;
+      color: var(--foreground);
+      font-size: 1rem;
+    }
+    .tooltip p {
+      margin: 0.5rem 0;
+      color: #aaa;
+      font-family: 'Satoshi', sans-serif;
+      font-weight: 300;
+    }
+    @media (max-width: 768px) {
+      .sky-info {
+        display: none;
+      }
+    }
+
+    /* Shooting star */
+    .shooting-star {
+      position: fixed;
+      width: 1px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 50%;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0;
+      box-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
+    }
+
+    @keyframes shoot {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) rotate(-45deg);
+      }
+      70% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-500px, 500px) rotate(-45deg);
+      }
+    }
+
+    .shooting-star::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100px;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 100%);
+      transform: translate(0%, -50%);
+      box-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Focus mode styles */
+    .focus-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 255, 159, 0.1);
+      border: 1px solid var(--foreground);
+      color: var(--foreground);
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.9rem;
+      z-index: 1000;
+      transition: all 0.3s ease;
+      display: none;
+    }
+
+    .focus-toggle:hover {
+      background: rgba(0, 255, 159, 0.2);
+      box-shadow: 0 0 10px rgba(0, 255, 159, 0.5);
+    }
+
+    .focus-toggle.active {
+      background: rgba(0, 255, 159, 0.3);
+      color: #00ff9f;
+    }
+
+    /* Focus mode activated */
+    body.focus-mode {
+      --background: #1a1a1a;
+      --foreground: #2a9d8f;
+      --highlight: #f4a261;
+      --glow: rgba(42, 157, 143, 0.3);
+    }
+
+    body.focus-mode .star {
+      animation-play-state: paused;
+      opacity: 0.1;
+    }
+
+    body.focus-mode::after {
+      display: none; /* Remove scanlines */
+    }
+
+    body.focus-mode .container {
+      max-width: 900px;
+      background-color: rgba(245, 245, 245, 0.05);
+      box-shadow: 0 0 15px rgba(42, 157, 143, 0.2);
+    }
+
+    body.focus-mode .article-content {
+      line-height: 1.8;
+      font-size: 1.05rem;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    body.focus-mode header {
+      border-bottom: 2px solid #2a9d8f;
+      animation: none;
+    }
+
+    body.focus-mode header h1 {
+      color: #2a9d8f;
+    }
+
+    body.focus-mode .file-item:hover {
+      background: rgba(42, 157, 143, 0.1);
+    }
+
+    body.focus-mode .back-btn {
+      border-color: #2a9d8f;
+      color: #2a9d8f;
+    }
+
+    body.focus-mode .back-btn:hover {
+      background: rgba(42, 157, 143, 0.1);
+    }
+
+    /* Hire Me Section Styles */
+    .hire-me-section {
+      background: rgba(0, 255, 159, 0.05);
+      border: 1px solid rgba(0, 255, 159, 0.2);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+
+    .services-list {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+    }
+
+    .services-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(0, 255, 159, 0.1);
+    }
+
+    .services-list li:last-child {
+      border-bottom: none;
+    }
+
+    .contact-links {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .contact-btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: rgba(0, 255, 159, 0.1);
+      border: 1px solid var(--foreground);
+      color: var(--foreground);
+      text-decoration: none;
+      border-radius: 4px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.9rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-btn:hover {
+      background: rgba(0, 255, 159, 0.3);
+      box-shadow: 0 0 20px rgba(0, 255, 159, 0.6), 0 0 40px rgba(0, 255, 159, 0.3);
+      transform: translateY(-3px) scale(1.05);
+      border-color: var(--foreground);
+      text-shadow: 0 0 10px rgba(0, 255, 159, 0.8);
+    }
+
+    .contact-btn:active {
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    /* Focus mode styles for hire me section */
+    body.focus-mode .hire-me-section {
+      background: rgba(42, 157, 143, 0.05);
+      border-color: rgba(42, 157, 143, 0.2);
+    }
+
+    body.focus-mode .services-list li {
+      border-bottom-color: rgba(42, 157, 143, 0.1);
+    }
+
+    body.focus-mode .contact-btn {
+      background: rgba(42, 157, 143, 0.1);
+      border-color: #2a9d8f;
+      color: #2a9d8f;
+    }
+
+    body.focus-mode .contact-btn:hover {
+      background: rgba(42, 157, 143, 0.2);
+      box-shadow: 0 0 10px rgba(42, 157, 143, 0.5);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: 'Share Tech Mono', monospace;
+      text-shadow: none;
+      position: relative; overflow-x: hidden;
+    }
+    header {
+      text-align: center;
+      padding: 2rem 1rem 1rem;
+      border-bottom: 2px solid var(--highlight);
+      position: relative; z-index: 2;
+    }
+    header h1 {
+      font-size: 2.5rem;
+      margin: 0;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-block;
+      background: linear-gradient(135deg, var(--highlight) 0%, #ff1493 25%, var(--foreground) 60%, var(--highlight) 100%);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradient-shift 45s ease infinite;
+    }
+    header h1:hover {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 20px var(--highlight)) drop-shadow(0 0 40px var(--foreground));
+      letter-spacing: 2px;
+    }
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* Hack command - spin animation */
+    @keyframes hack-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(1080deg); }
+    }
+    body.hacking {
+      animation: hack-spin 3s ease-in-out;
+    }
+
+    /* Konami code - blur/fizzle effect */
+    @keyframes fizzle {
+      0%, 100% {
+        filter: blur(0px) brightness(1);
+        transform: scale(1);
+      }
+      10% {
+        filter: blur(5px) brightness(1.5);
+        transform: scale(1.02);
+      }
+      20% {
+        filter: blur(2px) brightness(0.8);
+        transform: scale(0.98);
+      }
+      30% {
+        filter: blur(8px) brightness(1.3);
+        transform: scale(1.03);
+      }
+      40% {
+        filter: blur(3px) brightness(0.9);
+        transform: scale(0.99);
+      }
+      50% {
+        filter: blur(10px) brightness(1.6);
+        transform: scale(1.04);
+      }
+      60% {
+        filter: blur(4px) brightness(0.7);
+        transform: scale(0.97);
+      }
+      70% {
+        filter: blur(6px) brightness(1.4);
+        transform: scale(1.02);
+      }
+      80% {
+        filter: blur(3px) brightness(0.9);
+        transform: scale(0.99);
+      }
+      90% {
+        filter: blur(5px) brightness(1.2);
+        transform: scale(1.01);
+      }
+    }
+    body.fizzle {
+      animation: fizzle 5s ease-in-out;
+    }
+
+    /* Matrix rain canvas */
+    #matrixCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+      pointer-events: none;
+      display: none;
+    }
+    #matrixCanvas.active {
+      display: block;
+    }
+
+    /* Matrix modal */
+    .matrix-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .matrix-modal.active {
+      display: flex;
+    }
+    .matrix-modal-content {
+      text-align: center;
+      color: #00ff9f;
+      font-family: 'Courier New', monospace;
+      font-size: 24px;
+      text-shadow: 0 0 10px #00ff9f;
+    }
+    .matrix-modal-content p {
+      margin: 10px 0;
+    }
+    .modal-hint {
+      font-size: 16px;
+      opacity: 0.7;
+      margin-top: 20px !important;
+    }
+
+    /* Hack image overlay */
+    .hack-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .hack-overlay.active {
+      display: flex;
+    }
+    .hack-overlay img {
+      max-width: 400px;
+      max-height: 400px;
+      filter: drop-shadow(0 0 30px #00ff9f) drop-shadow(0 0 60px #00ff9f);
+      animation: hack-glow 1s ease-in-out infinite alternate;
+    }
+    @keyframes hack-glow {
+      0% {
+        filter: drop-shadow(0 0 20px #00ff9f) drop-shadow(0 0 40px #00ff9f);
+      }
+      100% {
+        filter: drop-shadow(0 0 40px #00ff9f) drop-shadow(0 0 80px #00ff9f);
+      }
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: rgba(20,20,20,0.8);
+      border: 1px solid var(--foreground);
+      box-shadow: 0 0 25px var(--glow);
+      position: relative; z-index: 2;
+      min-height: 400px;
+    }
+
+    /* Mobile responsive styles */
+    @media (max-width: 768px) {
+      .container {
+        margin: 1rem;
+        padding: 1rem;
+        max-width: none;
+      }
+
+      header {
+        padding: 1rem 0.5rem 0.5rem;
+      }
+
+      header h1 {
+        font-size: 2rem;
+      }
+
+      .terminal-nav {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .terminal-prompt {
+        font-size: 0.9rem;
+        margin-right: 0.25rem;
+      }
+
+      .terminal-input {
+        font-size: 0.9rem;
+      }
+
+      .breadcrumb {
+        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .terminal-box {
+        padding: 1rem;
+        font-size: 1rem;
+        width: 95%;
+      }
+
+      .now-playing {
+        margin: 2rem 1rem 1rem;
+        padding: 0.75rem;
+        font-size: 1rem;
+        max-width: none;
+      }
+
+      .controls {
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+      }
+
+      .play-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 1rem;
+      }
+    }
+
+    /* Extra small mobile devices */
+    @media (max-width: 480px) {
+      .container {
+        margin: 0.5rem;
+        padding: 0.75rem;
+      }
+
+      .terminal-nav {
+        padding: 0.5rem;
+      }
+
+      .terminal-prompt {
+        font-size: 0.8rem;
+      }
+
+      .terminal-input {
+        font-size: 0.8rem;
+      }
+
+      .terminal-input::placeholder {
+        font-size: 0.8rem;
+      }
+
+      .breadcrumb {
+        font-size: 0.8rem;
+      }
+
+      header h1 {
+        font-size: 1.75rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+
+      .now-playing {
+        margin: 1rem 0.5rem 0.5rem;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      .controls {
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .play-btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.9rem;
+      }
+
+      .marquee {
+        font-size: 0.9rem;
+      }
+    }
+    #content {
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+    #content.fade-out {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    #content.fade-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    h2 {
+      text-transform: uppercase;
+      color: var(--highlight);
+      border-left: 5px solid var(--highlight);
+      padding-left: 1rem;
+      margin-top: 2rem;
+      position: relative;
+      text-shadow: none;
+    }
+    h2::after {
+      content: '';
+      display: block;
+      height: 1px;
+      background: var(--foreground);
+      margin-top: 0.5rem;
+      box-shadow: 0 0 8px var(--glow);
+    }
+    p {
+      font-family: 'Satoshi', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      line-height: 1.8;
+      margin: 1rem 0;
+      letter-spacing: -0.01em;
+    }
+    a {
+      color: var(--foreground);
+      text-decoration: none;
+      border-bottom: 1px dotted var(--highlight);
+      cursor: pointer;
+    }
+    a:hover {
+      color: var(--highlight);
+      text-shadow: 0 0 6px var(--highlight);
+    }
+    hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--highlight), transparent);
+      margin: 3rem 0;
+      box-shadow: 0 0 6px var(--highlight);
+    }
+    .cursor {
+      display: inline-block;
+      width: 10px; height: 1em;
+      background-color: var(--foreground);
+      animation: blink 1s step-start infinite;
+      vertical-align: bottom;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    @keyframes glow-pulse {
+      0%, 100% { text-shadow: 0 0 4px var(--highlight); }
+      50% { text-shadow: 0 0 12px var(--highlight); }
+    }
+    .subtext {
+      font-family: 'Satoshi', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: #999;
+      margin-left: 1.5rem;
+      display: block;
+      font-style: normal;
+      opacity: 0.8;
+    }
+    .file-date {
+      margin-left: auto;
+      color: #888;
+      font-size: 0.8rem;
+    }
+    body::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; pointer-events: none;
+      background: repeating-linear-gradient(to bottom, transparent, transparent 2px, var(--scanline) 3px);
+      z-index: 1;
+    }
+    .terminal-overlay {
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: #000; color: var(--foreground);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 99; text-align: left;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .terminal-box {
+      padding: 2rem; background: #111;
+      border: 2px solid var(--highlight);
+      box-shadow: 0 0 15px var(--highlight);
+      max-width: 600px; width: 90%;
+      font-size: 1.2rem; line-height: 1.5;
+      white-space: pre-line;
+    }
+    .now-playing {
+      margin: 3rem auto 1rem;
+      padding: 1rem;
+      background: #111;
+      border: 1px solid var(--highlight);
+      box-shadow: 0 0 10px var(--glow);
+      max-width: 800px;
+      font-size: 1.1rem;
+      position: relative;
+      overflow: visible;
+    }
+    .marquee-wrapper { overflow: hidden; white-space: nowrap; }
+    .marquee {
+      display: inline-block;
+    }
+    .marquee.scrolling {
+      padding-left: 100%;
+      animation: marquee var(--marquee-duration) linear infinite;
+    }
+    .marquee-wrapper:hover .marquee.scrolling { animation-play-state: paused; }
+    @keyframes marquee { 0% { transform: translateX(0);} 100% { transform: translateX(-100%);} }
+    .controls { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; }
+    .play-btn {
+      background: var(--highlight);
+      border: none;
+      color: var(--background);
+      padding: 0.3rem 0.6rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 0 6px var(--highlight);
+      text-shadow: none;
+    }
+    .slider {
+      flex: 1; height: 8px;
+      background: var(--foreground);
+      border-radius: 5px;
+      outline: none;
+      appearance: none;
+      box-shadow: 0 0 8px var(--highlight);
+    }
+    .slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%; background: var(--highlight);
+      cursor: pointer; box-shadow: 0 0 4px var(--highlight);
+    }
+    .slider::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%; background: var(--highlight);
+      cursor: pointer;
+    }
+    .progress-bar {
+      width: 100%; height: 4px;
+      background: var(--background);
+      border: none; margin-top: 0.5rem;
+    }
+    .progress-bar::-webkit-progress-value { background: var(--highlight); }
+    .progress-bar::-moz-progress-bar { background: var(--highlight); }
+
+    /* Terminal Navigation Styles */
+    .terminal-nav {
+      background: #111;
+      border: 1px solid var(--highlight);
+      padding: 1rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 0 10px var(--glow);
+    }
+    .terminal-prompt {
+      color: var(--highlight);
+      margin-right: 0.5rem;
+    }
+    .terminal-input {
+      background: transparent;
+      border: none;
+      color: var(--foreground);
+      font-family: inherit;
+      outline: none;
+      flex: 1;
+      font-size: 1.1rem;
+    }
+    .terminal-output {
+      background: #0a0a0a;
+      border: 1px solid #333;
+      padding: 1rem;
+      margin-top: 1rem;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      display: none;
+    }
+
+    .terminal-output::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .terminal-output::-webkit-scrollbar-track {
+      background: #0a0a0a;
+      border-radius: 4px;
+    }
+
+    .terminal-output::-webkit-scrollbar-thumb {
+      background: var(--foreground);
+      border-radius: 4px;
+      border: 1px solid #333;
+    }
+
+    .terminal-output::-webkit-scrollbar-thumb:hover {
+      background: var(--highlight);
+    }
+    .terminal-output.show {
+      display: block;
+    }
+    .breadcrumb {
+      color: #888;
+      margin-bottom: 1rem;
+    }
+    .file-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .file-item {
+      padding: 0.5rem 0;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      padding-left: 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-origin: left center;
+      position: relative;
+    }
+    .file-item:hover {
+      border-left-color: var(--highlight);
+      background: rgba(255, 60, 172, 0.1);
+      padding-left: 1.5rem;
+      transform: scale(1.02);
+      box-shadow: 0 4px 20px rgba(255, 60, 172, 0.3);
+      text-shadow: 0 0 8px rgba(0, 255, 159, 0.5);
+    }
+    .file-item .preview-card {
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%) translateX(20px);
+      background: rgba(20, 20, 20, 0.98);
+      border: 1px solid var(--highlight);
+      padding: 1rem;
+      min-width: 300px;
+      max-width: 400px;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 32px rgba(255, 60, 172, 0.4);
+    }
+    .file-item:hover .preview-card {
+      opacity: 1;
+      transform: translateY(-50%) translateX(10px);
+    }
+    .preview-card h3 {
+      margin: 0 0 0.5rem 0;
+      color: var(--foreground);
+      font-size: 1rem;
+    }
+    .preview-card .tags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .preview-card .tag {
+      background: rgba(0, 255, 159, 0.2);
+      color: var(--foreground);
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      font-size: 0.75rem;
+    }
+    .preview-card .excerpt {
+      font-family: 'Satoshi', sans-serif;
+      color: #aaa;
+      font-size: 0.85rem;
+      font-weight: 300;
+      line-height: 1.5;
+      margin-top: 0.5rem;
+    }
+    .preview-card img {
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      border: 1px solid var(--highlight);
+    }
+    .preview-card .project-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--highlight);
+    }
+    @media (max-width: 768px) {
+      .file-item .preview-card {
+        display: none;
+      }
+      header h1 .preview-card {
+        display: none;
+      }
+    }
+
+    /* Header preview card */
+    header h1 {
+      position: relative;
+    }
+    header h1 .preview-card {
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      transform: translateX(-50%) translateY(20px);
+      background: #000;
+      border: 2px solid var(--foreground);
+      padding: 0;
+      width: 400px;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 4px;
+      overflow: hidden;
+      line-height: 0;
+    }
+    header h1:hover .preview-card {
+      opacity: 1;
+      transform: translateX(-50%) translateY(10px);
+    }
+    header h1 .preview-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      vertical-align: bottom;
+      margin: 0;
+      padding: 0;
+    }
+    .file-item.directory {
+      color: #4FC3F7;
+    }
+    .file-item.article {
+      color: var(--foreground);
+    }
+    .file-item.executable {
+      color: #81C784;
+    }
+    .search-container {
+      margin-bottom: 1rem;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.5rem;
+      background: #1a1a1a;
+      border: 1px solid var(--highlight);
+      color: var(--foreground);
+      font-family: inherit;
+      font-size: 1rem;
+      border-radius: 4px;
+      outline: none;
+    }
+    .search-input:focus {
+      box-shadow: 0 0 8px var(--highlight);
+    }
+    .article-title {
+      font-weight: bold;
+      color: var(--foreground);
+    }
+    .article-date {
+      color: #888;
+      font-size: 0.9rem;
+      margin-left: 1rem;
+    }
+    .article-content {
+      font-family: 'Satoshi', sans-serif;
+      line-height: 1.9;
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+    .article-content h2,
+    .article-content h3,
+    .article-content h4 {
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .article-content h3 {
+      color: var(--highlight);
+      border-bottom: 1px solid var(--highlight);
+      padding-bottom: 0.5rem;
+      margin-top: 2rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .article-content p {
+      margin: 1.25rem 0;
+    }
+    .article-content strong {
+      font-weight: 600;
+      color: var(--foreground);
+    }
+    .article-content em {
+      font-style: italic;
+      color: #bbb;
+    }
+    .article-content code {
+      background: #222;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      color: #81C784;
+    }
+    .article-content pre {
+      background: #1a1a1a;
+      padding: 1rem;
+      border: 1px solid var(--highlight);
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      box-shadow: 0 0 10px rgba(255, 60, 172, 0.3);
+    }
+    .article-content pre code {
+      background: transparent;
+      color: var(--foreground);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      white-space: pre;
+      display: block;
+    }
+    .article-content img {
+      max-width: 100%;
+      height: auto;
+      border: 2px solid var(--highlight);
+      border-radius: 4px;
+      margin: 2rem 0;
+      box-shadow: 0 0 20px rgba(255, 60, 172, 0.4);
+      display: block;
+    }
+    .back-btn {
+      background: transparent;
+      border: 1px solid var(--highlight);
+      color: var(--highlight);
+      padding: 0.5rem 1rem;
+      font-family: inherit;
+      cursor: pointer;
+      margin-bottom: 2rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .back-btn:hover {
+      background: var(--highlight);
+      color: var(--background);
+      box-shadow: 0 0 20px var(--highlight), 0 0 40px rgba(255, 60, 172, 0.5);
+      transform: translateY(-2px) scale(1.05);
+    }
+    .back-btn:active {
+      transform: translateY(0) scale(1);
+    }
+    .typing-effect {
+      overflow: hidden;
+      white-space: nowrap;
+      animation: typing 2s steps(40, end);
+    }
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>
+      Posix Party
+    </h1>
+  </header>
+  
+  <div class="container">
+    <div class="terminal-nav">
+      <div class="breadcrumb" id="breadcrumb">~/posixparty.com</div>
+      <div style="display: flex; align-items: center;">
+        <span class="terminal-prompt">posixparty@kingsport:~$</span>
+        <input type="text" class="terminal-input" id="terminalInput" placeholder="type 'help'">
+      </div>
+      <div class="terminal-output" id="terminalOutput"></div>
+    </div>
+    
+    <div id="content">
+      <!-- Content will be loaded by JavaScript -->
+    </div>
+  </div>
+
+  <div id="terminal" class="terminal-overlay" style="display:none;">
+    <div class="terminal-box" id="terminal-box"></div>
+  </div>
+
+  <div class="now-playing">
+    <div class="marquee-wrapper">
+      <div id="marqueeText" class="marquee">click &gt; to rock out 🤘</div>
+    </div>
+    <div class="controls">
+      <button id="playBtn" class="play-btn">&gt;</button>
+      <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.5" class="slider" />
+    </div>
+    <progress id="progressBar" class="progress-bar" value="0" max="1"></progress>
+    <audio id="bgAudio" src="taiko.mp3" loop muted></audio>
+  </div>
+
+  <!-- Focus Mode Toggle Button -->
+  <button id="focusToggle" class="focus-toggle">🎯 Focus Mode</button>
+
+  <!-- Sky Info Display -->
+  <div class="sky-info" id="skyInfo">
+    <div><span class="label">LST:</span> <span id="lstTime">--:--:--</span></div>
+    <div><span class="label">Location:</span> <span id="location">Loading...</span></div>
+    <div><span class="label">Visible:</span> <span id="visibleStars">--</span> stars</div>
+    <div class="tooltip">
+      <h4>⭐ Real Star System</h4>
+      <p>The stars you see on this page represent the actual night sky based on your location and the current time.</p>
+      <p>Each star is accurately positioned using real astronomical data from star catalogs, showing you which stars are currently visible above your horizon.</p>
+      <p><strong>LST:</strong> Local Sidereal Time - astronomical time based on Earth's rotation relative to distant stars.</p>
+    </div>
+  </div>
+
+  <!-- Matrix Rain Canvas -->
+  <canvas id="matrixCanvas"></canvas>
+
+  <!-- Matrix Modal -->
+  <div id="matrixModal" class="matrix-modal">
+    <div class="matrix-modal-content">
+      <p>the matrix has you</p>
+      <p class="modal-hint">Press ESC to exit</p>
+    </div>
+  </div>
+
+  <!-- Hack Overlay -->
+  <div id="hackOverlay" class="hack-overlay">
+    <img src="pix/mr-robot-mask.png" alt="Mr. Robot">
+  </div>
+
+  <script>
+    // Articles will be loaded from external files
+    let articles = {};
+    let sponsors = {};
+
+    // Load articles index and content
+    async function loadArticles() {
+      try {
+        const response = await fetch('articles/articles.json');
+        const articlesIndex = await response.json();
+
+        // Load each article's metadata
+        for (const [filename, metadata] of Object.entries(articlesIndex)) {
+          articles[filename] = {
+            title: metadata.title,
+            date: metadata.date,
+            tags: metadata.tags || [],
+            emoji: metadata.emoji || '📄',
+            filename: filename
+          };
+        }
+
+        // Handle hash routing after articles are loaded
+        if (window.location.hash) {
+          const hash = window.location.hash.slice(1);
+          const [section, filename] = hash.split('/');
+
+          if (section === 'articles' && filename && articles[filename]) {
+            // Navigate to articles and show the specific article
+            setTimeout(() => {
+              navigate('articles');
+              setTimeout(() => {
+                showArticle(filename, articles[filename]);
+              }, 100);
+            }, 100);
+            return; // Don't run the normal home navigation
+          } else if (section === 'sponsors' && filename && sponsors[filename]) {
+            // Navigate to sponsors and show the specific sponsor
+            setTimeout(() => {
+              navigate('sponsors');
+              setTimeout(() => {
+                showArticle(filename, sponsors[filename]);
+              }, 100);
+            }, 100);
+            return; // Don't run the normal home navigation
+          }
+        }
+
+      } catch (error) {
+        console.log('Could not load articles index, using fallback data');
+        // Fallback to built-in articles if files aren't available
+        articles = {
+          'parsimony.md': {
+            title: 'Parsimony and Aegix Linux',
+            content: `
+# Parsimony and Aegix Linux
+
+**Parsimony** refers to simplicity or frugality in design—favoring the fewest necessary components or complexities. In software engineering, it embodies minimalism, efficiency, and clarity, where complexity is deliberately avoided unless justified by necessity.
+
+Aegix Linux exemplifies parsimony by employing a streamlined approach to its architecture and user experience. Built upon Artix Linux and utilizing the lightweight **Runit** init system instead of the more complex systemd, Aegix emphasizes performance, simplicity, and user control. By reducing dependencies, avoiding unnecessary layers, and adhering to straightforward POSIX-compliant scripting, Aegix Linux provides users with a clean, efficient operating environment that embodies the very principle of parsimony.
+            `,
+            date: '2025-07-29',
+            tags: ['linux', 'aegix', 'philosophy'],
+            emoji: '🧘'
+          }
+        };
+      }
+    }
+
+    // Load article content from markdown file
+    async function loadArticleContent(filename) {
+      try {
+        console.log(`Attempting to load: articles/${filename}`);
+        // Add cache-busting parameter to prevent caching
+        const timestamp = Date.now();
+        const response = await fetch(`articles/${filename}?t=${timestamp}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const content = await response.text();
+        console.log(`Successfully loaded ${filename}, content length: ${content.length}`);
+        return content;
+      } catch (error) {
+        console.log(`Could not load ${filename}, using fallback. Error:`, error);
+        // Return fallback content if file loading fails
+        return articles[filename]?.content || `# Article Not Found\n\nSorry, the article "${filename}" could not be loaded.`;
+      }
+    }
+
+    // Sponsors data
+    sponsors = {
+      'The Inventor Center': {
+        title: 'The Inventor Center - Kingsport, TN',
+        content: `
+# The Inventor Center
+
+**Location**: Kingsport, Tennessee
+**Website**: [theinventorcenter.com](https://theinventorcenter.com)
+
+## About
+
+The Inventor Center is a makerspace and innovation hub in Kingsport, TN, providing tools, resources, and community space for makers, tinkerers, and creators.
+
+## What They Offer
+
+- **Makerspace** - Access to tools, 3D printers, electronics lab, and more
+- **Workshops** - Regular classes and training sessions
+- **Community Events** - Meetups, hackathons, and social gatherings
+- **Collaboration Space** - Work alongside other creative minds
+
+## Posix Party @ The Inventor Center
+
+The Inventor Center graciously hosts our monthly Posix Party GNU/Linux meetup, providing:
+- Meeting space for our community
+- Access to their facilities and resources
+- A welcoming environment for learning and collaboration
+
+We're grateful for their support of open source and the local tech community!
+
+*Visit [theinventorcenter.com](https://theinventorcenter.com) to learn more about membership and upcoming events.*
+        `,
+        date: '2025-10-01'
+      },
+      'Aegix Linux': {
+        title: 'Aegix Linux',
+        content: `
+# Aegix Linux
+
+**Website**: [aegixlinux.org](https://aegixlinux.org)
+
+## About
+
+A GNU/Linux distribution built with parsimony, purpose, and love for the craft.
+
+## Key Features
+
+- **Lightweight** - Based on Artix Linux with Runit init system
+- **Developer-focused** - Pre-configured for software development
+- **Suckless tools** - dwm, dmenu, st, and other minimalist tools
+- **Encrypted by default** - Security-first approach
+- **Community-driven** - Built by users, for users
+
+## Philosophy
+
+Technology should serve human flourishing. Aegix Linux embodies this through simplicity, transparency, and respect for user freedom.
+
+*Visit [aegixlinux.org](https://aegixlinux.org) to download and learn more.*
+        `,
+        date: '2025-10-01'
+      },
+      'timbeach.com': {
+        title: 'Timothy D Beach',
+        content: `
+# Timothy D Beach
+
+**Website**: [timbeach.com](https://timbeach.com)
+
+## About
+
+Software engineer, recording artist, and GNU/Linux enthusiast - building things with purpose.
+
+## Projects
+
+- **Aegix Linux** - Founder and lead developer
+- **Web Development** - Full-stack engineering
+- **Audio Engineering** - Music production and recording
+- **Open Source** - Contributions to the FOSS community
+
+## Posix Party
+
+Tim organizes and hosts the monthly Posix Party GNU/Linux meetup in Kingsport, TN, sharing knowledge and fostering community around open source technologies.
+
+*Visit [timbeach.com](https://timbeach.com) to learn more about Tim's work.*
+        `,
+        date: '2025-10-01'
+      }
+    };
+
+    let currentPath = [];
+    let currentView = 'home';
+
+    // Terminal commands
+    const commands = {
+      help: () => `Available commands:
+  ls          - list files in current directory
+  cd [dir]    - change directory
+  cat [file]  - display file contents
+  clear       - clear terminal
+  whoami      - display user info
+  pwd         - show current path
+  tree        - show directory structure
+  back        - return to previous view
+  easter      - why not try it?`,
+      
+      ls: () => {
+        if (currentPath.length === 0) {
+          return `Recent Articles:
+${getRecentArticles(3).map(([filename, article]) => `  ${article.emoji} ${article.title}`).join('\n')}
+
+Resources:
+  🏛️ The Inventor Center (https://theinventorcenter.com)
+  🐧 GNU/Linux Resources (coming soon)
+
+Directories:
+  articles/`;
+        } else if (currentPath[0] === 'articles') {
+          return Object.keys(articles).join('    ');
+        } else if (currentPath[0] === 'sponsors') {
+          return Object.keys(sponsors).join('    ');
+        }
+        return 'Directory not found';
+      },
+      
+      cd: (dir) => {
+        if (!dir || dir === '~' || dir === '/') {
+          currentPath = [];
+          navigate('home');
+          return 'Changed to home directory';
+        } else if (dir === '..') {
+          if (currentPath.length > 0) {
+            currentPath.pop();
+            navigate(currentPath.length > 0 ? currentPath[0] : 'home');
+            return 'Navigated up one directory';
+          }
+          return 'Already at root directory';
+        } else if (dir === 'articles' && currentPath.length === 0) {
+          navigate('articles');
+          return 'Entered articles directory';
+        } else if (dir === 'sponsors' && currentPath.length === 0) {
+          navigate('sponsors');
+          return 'Entered sponsors directory';
+        }
+        return `Directory '${dir}' not found`;
+      },
+      
+      cat: (file) => {
+        if (currentPath[0] === 'articles' && articles[file]) {
+          showArticle(file, articles[file]);
+          return `Fetching ${file} from server...`;
+        } else if (currentPath[0] === 'sponsors' && sponsors[file]) {
+          showArticle(file, sponsors[file]);
+          return `Loading ${file}...`;
+        }
+        return `File '${file}' not found`;
+      },
+      
+      clear: () => {
+        document.getElementById('terminalInput').value = '';
+        return '';
+      },
+      
+      whoami: () => 'Posix Party - Monthly GNU/Linux Meetup in Kingsport, TN',
+      
+      pwd: () => '~/' + currentPath.join('/'),
+      
+      tree: () => {
+        // Get recent articles for tree display
+        const recentArticles = getRecentArticles(3);
+        const sortedArticles = Object.keys(articles).sort((a, b) => {
+          const dateA = new Date(articles[a].date);
+          const dateB = new Date(articles[b].date);
+          return dateB - dateA;
+        });
+
+        return `~/posixparty.com
+├── Recent Articles
+│   ${recentArticles.map(([file, article]) => `├── ${article.emoji} ${article.title}`).join('\n│   ')}
+├── Resources
+│   ├── 🏛️ The Inventor Center (external)
+│   └── 🐧 GNU/Linux Resources (coming soon)
+└── articles/
+    ${sortedArticles.map(file => `├── ${file}`).join('\n    ')}`;
+      },
+      
+      back: () => {
+        navigate('home');
+        return 'Returned to home directory';
+      },
+
+      // Easter eggs
+      matrix: () => {
+        showMatrixModal();
+        return `Wake up, Neo...
+The Matrix has you.
+Follow the white rabbit.
+
+Knock, knock.`;
+      },
+
+      hack: () => {
+        // Show Mr. Robot mask and trigger fizzle effect
+        const overlay = document.getElementById('hackOverlay');
+        overlay.classList.add('active');
+
+        // Start fizzle effect
+        document.body.classList.add('fizzle');
+
+        // After fizzle completes (5 seconds), hide everything
+        setTimeout(() => {
+          document.body.classList.remove('fizzle');
+          overlay.classList.remove('active');
+        }, 5000);
+
+        const steps = [
+          'Initializing hack sequence...',
+          'Bypassing firewall...',
+          'Cracking 256-bit encryption...',
+          'Accessing mainframe...',
+          'Downloading secrets...',
+          '[FIZZLE DETECTED]',
+          '... nice try.. you\'re no mr robot'
+        ];
+        return steps.join('\n');
+      },
+
+      easter: () => {
+        return `🥚 Hidden Easter Egg Commands:
+
+  matrix    - Enter the Matrix
+  hack      - Attempt to hack the mainframe
+  sudo      - Try to gain root access
+  rickroll  - Never gonna give you up
+  coffee    - Brew some ASCII coffee
+  vim       - Learn to exit vim
+  meaning   - The answer to everything
+  konami    - The legendary code
+
+Type any command to activate it!`;
+      },
+
+      sudo: () => {
+        return `[sudo] password for posixparty:
+Permission denied. You are not in the sudoers file.
+This incident will be reported to your mother.`;
+      },
+
+      rickroll: () => {
+        window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
+        return 'Never gonna give you up, never gonna let you down...';
+      },
+
+      pray: () => {
+        return `🙏 Gospodi Iisuse Khriste, Syne Bozhy, pomiluy mya greshnago.
+
+(Lord Jesus Christ, Son of God, have mercy on me, a sinner)`;
+      },
+
+      coffee: () => {
+        return `      )  (
+     (   ) )
+      ) ( (
+    _______)_
+ .-'---------|
+( C|/\\/\\/\\/\\/|
+ '-./\\/\\/\\/\\/|
+   '_________'
+    '-------'
+
+Coffee.exe is brewing...`;
+      },
+
+      vim: () => {
+        return `You are now in vim.
+
+How to exit vim:
+1. Don't panic
+2. Press ESC
+3. Type :q!
+4. Press Enter
+5. Question your life choices
+
+...just kidding, you're still in the browser. Try 'help' instead.`;
+      },
+
+      meaning: () => {
+        return '42';
+      },
+
+      konami: () => {
+        // Trigger spin animation
+        document.body.classList.add('hacking');
+        setTimeout(() => {
+          document.body.classList.remove('hacking');
+        }, 3000);
+
+        return `↑ ↑ ↓ ↓ ← → ← → B A
+
+🎮 KONAMI CODE ACTIVATED
++30 Lives
+Unlimited Ammo
+God Mode: ON
+
+...in your imagination, anyway.`;
+      }
+    };
+
+    function getRecentArticles(count = 3) {
+      return Object.entries(articles)
+        .sort(([,a], [,b]) => new Date(b.date) - new Date(a.date))
+        .slice(0, count);
+    }
+
+    function navigate(section) {
+      playWhoosh(); // Play navigation sound
+      const content = document.getElementById('content');
+      const breadcrumb = document.getElementById('breadcrumb');
+
+      // Fade out current content
+      content.classList.add('fade-out');
+
+      // Wait for fade out, then update content
+      setTimeout(() => {
+        // Hide focus toggle when not viewing articles, unless focus mode is active
+        if (section !== 'article' && !focusMode) {
+          hideFocusToggle();
+        }
+
+        if (section === 'home') {
+        currentPath = [];
+        currentView = 'home';
+        breadcrumb.textContent = '~/posixparty.com';
+        // Clear URL hash when going home
+        isProgrammaticNavigation = true;
+        window.location.hash = '';
+        setTimeout(() => {
+          isProgrammaticNavigation = false;
+        }, 100);
+        // Get 3 most recent articles
+        const recentArticles = getRecentArticles(3);
+
+        content.innerHTML = `
+          <!-- HIRE ME SECTION - Commented out for future revamp
+          <div class="content">
+            <h2>🎉 Join Us</h2>
+            <div class="hire-me-section">
+              <p>Monthly GNU/Linux meetup at The Inventor Center in Kingsport, TN. All skill levels welcome!</p>
+              <div class="contact-links">
+                <a href="https://theinventorcenter.com/" target="_blank" class="contact-btn">🏛️ The Inventor Center</a>
+                <a href="mailto:contact@posixparty.com" class="contact-btn">📧 Contact</a>
+              </div>
+            </div>
+          </div>
+          <div class="content">
+            <hr>
+          -->
+          <div class="content">
+            <h2>Recent Articles</h2>
+            <ul class="file-list">
+              ${recentArticles.map(([filename, article]) => `
+                <li class="file-item article" onclick="showArticle('${filename}', articles['${filename}'])">
+                  ${article.emoji} ${article.title}
+                  <span class="file-date">${article.date}</span>
+                  <div class="preview-card">
+                    <h3>${article.title}</h3>
+                    <div class="tags">
+                      ${(article.tags || []).map(tag => `<span class="tag">#${tag}</span>`).join('')}
+                    </div>
+                    <div class="excerpt">Click to read more...</div>
+                  </div>
+                </li>
+              `).join('')}
+            </ul>
+            <p><a href="#" onclick="navigate('articles'); return false;" style="color: var(--foreground);">View all articles →</a></p>
+          </div>
+          <div class="content">
+            <hr>
+            <h2>Sponsored By</h2>
+            <ul class="file-list">
+              <li class="file-item executable" onclick="launchTerminal('https://theinventorcenter.com')">🏛️ The Inventor Center
+                <span class="subtext">Makerspace & Innovation Hub - Kingsport, TN</span>
+              </li>
+              <li class="file-item executable" onclick="launchTerminal('https://aegixlinux.org')">🐧 Aegix Linux
+                <span class="subtext">GNU/Linux distribution built with parsimony</span>
+              </li>
+              <li class="file-item executable" onclick="launchTerminal('https://timbeach.com')">💻 timbeach.com
+                <span class="subtext">Software engineer & GNU/Linux enthusiast</span>
+              </li>
+            </ul>
+          </div>
+        `;
+      } else if (section === 'articles') {
+        currentPath = ['articles'];
+        currentView = 'articles';
+        breadcrumb.textContent = '~/posixparty.com/articles';
+        // Update URL hash for articles section
+        isProgrammaticNavigation = true;
+        window.location.hash = 'articles';
+        setTimeout(() => {
+          isProgrammaticNavigation = false;
+        }, 100);
+        // Sort articles by date (newest first)
+        const sortedArticles = Object.keys(articles).sort((a, b) => {
+          const dateA = new Date(articles[a].date);
+          const dateB = new Date(articles[b].date);
+          return dateB - dateA; // Newest first
+        });
+        
+        content.innerHTML = `
+          <button class="back-btn" onclick="navigate('home')">← back</button>
+          <h2>Articles</h2>
+          <div class="search-container">
+            <input type="text" id="articleSearch" placeholder="Search articles..." class="search-input">
+          </div>
+          <ul class="file-list" id="articleList">
+            ${sortedArticles.map(file =>
+              `<li class="file-item article" onclick="showArticle('${file}', articles['${file}'])">
+                <span class="article-title">${articles[file].emoji} ${articles[file].title}</span>
+                <span class="article-date">${articles[file].date}</span>
+                <div class="preview-card">
+                  <h3>${articles[file].title}</h3>
+                  <div class="tags">
+                    ${(articles[file].tags || []).map(tag => `<span class="tag">#${tag}</span>`).join('')}
+                  </div>
+                  <div class="excerpt">Click to read more...</div>
+                </div>
+              </li>`
+            ).join('')}
+          </ul>
+        `;
+        
+        // Add search functionality
+        const searchInput = document.getElementById('articleSearch');
+        const articleList = document.getElementById('articleList');
+        
+        searchInput.addEventListener('input', function() {
+          const searchTerm = this.value.toLowerCase();
+          const listItems = articleList.querySelectorAll('li');
+          
+          listItems.forEach(item => {
+            const title = item.querySelector('.article-title').textContent.toLowerCase();
+            const filename = item.onclick.toString().includes('showArticle') ? 
+              item.onclick.toString().match(/showArticle\('([^']+)'/)[1].toLowerCase() : '';
+            
+            if (title.includes(searchTerm) || filename.includes(searchTerm)) {
+              item.style.display = 'block';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+        });
+      } else if (section === 'sponsors') {
+        currentPath = ['sponsors'];
+        currentView = 'sponsors';
+        breadcrumb.textContent = '~/posixparty.com/sponsors';
+        // Update URL hash for sponsors section
+        isProgrammaticNavigation = true;
+        window.location.hash = 'sponsors';
+        setTimeout(() => {
+          isProgrammaticNavigation = false;
+        }, 100);
+        content.innerHTML = `
+          <button class="back-btn" onclick="navigate('home')">← back</button>
+          <h2>Sponsored By</h2>
+          <ul class="file-list">
+            ${Object.keys(sponsors).map(file =>
+              `<li class="file-item article" onclick="showArticle('${file}', sponsors['${file}'])">${file}</li>`
+            ).join('')}
+          </ul>
+        `;
+      }
+
+      // Fade in new content
+      content.classList.remove('fade-out');
+      content.classList.add('fade-in');
+      }, 300); // Match transition duration
+    }
+
+    let isShowingArticle = false; // Prevent multiple simultaneous article loads
+    
+    async function showArticle(filename, article) {
+      if (isShowingArticle) return; // Prevent multiple simultaneous loads
+      playClick(); // Play click sound when opening article
+
+      const content = document.getElementById('content');
+      const breadcrumb = document.getElementById('breadcrumb');
+
+      // Show focus toggle when viewing an article
+      showFocusToggle();
+      
+      // Determine the section based on where we are
+      let section = 'articles';
+      if (currentPath.length > 0) {
+        section = currentPath[0];
+      } else if (currentView === 'sponsors') {
+        section = 'sponsors';
+      }
+      
+      // Add to path
+      if (currentPath.length === 1) {
+        currentPath.push(filename);
+      }
+      
+      breadcrumb.textContent = '~/posixparty.com/' + currentPath.join('/');
+      
+      // Update URL hash for direct linking
+      isProgrammaticNavigation = true;
+      window.location.hash = `${section}/${filename}`;
+      setTimeout(() => {
+        isProgrammaticNavigation = false;
+      }, 100);
+      
+      isShowingArticle = true;
+      
+      // Load content with smooth transition
+      try {
+        let markdownContent;
+        
+        if (section === 'sponsors' && sponsors[filename]) {
+          // Use built-in sponsor content
+          markdownContent = sponsors[filename].content;
+        } else {
+          // Load the actual markdown content from server
+          markdownContent = await loadArticleContent(filename);
+        }
+        
+        // Create the new content
+        const newContent = `
+          <button class="back-btn" onclick="navigate('${section}')">← back to ${section}/</button>
+          <div class="article-content">
+            ${parseMarkdown(markdownContent)}
+          </div>
+        `;
+        
+        // Update content smoothly
+        content.classList.add('fade-out');
+        setTimeout(() => {
+          content.innerHTML = newContent;
+          content.classList.remove('fade-out');
+          content.classList.add('fade-in');
+        }, 300);
+        
+      } catch (error) {
+        const errorContent = `
+          <button class="back-btn" onclick="navigate('${section}')">← back to ${section}/</button>
+          <div class="article-content">
+            <h2 style="color: var(--highlight);">Connection Failed</h2>
+            <p>Could not load article "${filename}". Please check your connection or try again later.</p>
+            <pre style="color: #888;">Error: ${error.message}</pre>
+          </div>
+        `;
+
+        content.classList.add('fade-out');
+        setTimeout(() => {
+          content.innerHTML = errorContent;
+          content.classList.remove('fade-out');
+          content.classList.add('fade-in');
+        }, 300);
+      }
+      currentPath.pop(); // Remove filename from path after loading
+      isShowingArticle = false; // Reset flag when done
+    }
+
+    function parseMarkdown(content) {
+      // First handle code blocks to prevent interference with other parsing
+      let processedContent = content;
+      
+      // Temporarily replace code blocks with placeholders to protect them
+      const codeBlocks = [];
+      let codeBlockIndex = 0;
+      
+      // Handle code blocks with language specification
+      processedContent = processedContent.replace(/```\s*(\w+)?\s*\n?([\s\S]*?)\n?```/g, (match, lang, code) => {
+        const placeholder = `__CODE_BLOCK_${codeBlockIndex}__`;
+        codeBlocks.push({ placeholder, lang: lang || '', code: code.trim() });
+        codeBlockIndex++;
+        return placeholder;
+      });
+      
+      // Handle inline code
+      processedContent = processedContent.replace(/`([^`]+)`/g, '<code>$1</code>');
+      
+      // Handle headers (but not inside code blocks since they're now placeholders)
+      processedContent = processedContent
+        .replace(/^# (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^### (.+)$/gm, '<h4>$1</h4>');
+      
+      // Handle bold and italic
+      processedContent = processedContent
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>');
+      
+      // Handle images (must come before links since ![...] contains [...])
+      processedContent = processedContent.replace(/!\[([^\]]*)\]\((.+?)\)/g, '<img src="$2" alt="$1" />');
+
+      // Handle links
+      processedContent = processedContent.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
+      
+      // Handle paragraphs (but not inside pre tags)
+      processedContent = processedContent
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/^(.+)$/gm, '<p>$1</p>');
+      
+      // Clean up
+      processedContent = processedContent
+        .replace(/<p><h/g, '<h')
+        .replace(/<\/h([1-6])><\/p>/g, '</h$1>')
+        .replace(/<p><pre>/g, '<pre>')
+        .replace(/<\/pre><\/p>/g, '</pre>');
+      
+      // Restore code blocks
+      codeBlocks.forEach(({ placeholder, lang, code }) => {
+        // Trim leading/trailing whitespace but preserve internal formatting
+        const trimmedCode = code.replace(/^\n+|\n+$/g, '');
+        const codeElement = lang ? `<pre><code class="language-${lang}">${trimmedCode}</code></pre>` : `<pre><code>${trimmedCode}</code></pre>`;
+        processedContent = processedContent.replace(placeholder, codeElement);
+      });
+      
+      return processedContent;
+    }
+
+    function showLoadingTerminal(message, callback) {
+      const terminal = document.getElementById('terminal');
+      const box = document.getElementById('terminal-box');
+      
+      const messages = [
+        '> ' + message,
+        '> scanning filesystem...',
+        '> parsing metadata...',
+        '> rendering content...',
+        '> blessing output...'
+      ];
+      
+      terminal.style.display = 'flex';
+      box.textContent = ''; // Clear any previous content
+      let i = 0;
+      
+      function showNextMessage() {
+        if (i < messages.length) {
+          if (i === 0) {
+            box.textContent = messages[i];
+          } else {
+            box.textContent += '\n' + messages[i];
+          }
+          i++;
+          setTimeout(showNextMessage, 800); // Slightly slower for smoother effect
+        } else {
+          setTimeout(() => {
+            terminal.style.display = 'none';
+            box.textContent = ''; // Clear content when hiding
+            callback();
+          }, 1000);
+        }
+      }
+      
+      showNextMessage();
+    }
+
+    // Strip emoji from article title for autocomplete matching
+    function stripEmoji(str) {
+      return str.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+    }
+
+    // Tab autocomplete for terminal
+    function handleTabComplete(input) {
+      const parts = input.trim().split(' ');
+
+      // Autocomplete for 'cd' command at root
+      if (parts[0] === 'cd' && currentPath.length === 0) {
+        const partial = parts.slice(1).join(' ');
+        const directories = ['articles', 'sponsors'];
+
+        const matches = directories.filter(dir =>
+          dir.toLowerCase().startsWith(partial.toLowerCase())
+        );
+
+        if (matches.length === 1) {
+          // Single match - autocomplete it
+          return `cd ${matches[0]}`;
+        } else if (matches.length > 1 && partial.length > 0) {
+          // Multiple matches - show options
+          const output = document.getElementById('terminalOutput');
+          output.textContent += `\nMatching directories:\n`;
+          matches.forEach(dir => {
+            output.textContent += `  ${dir}/\n`;
+          });
+          output.textContent += '\n';
+          output.classList.add('show');
+          output.scrollTop = output.scrollHeight;
+          return input; // Keep current input
+        }
+      }
+
+      // Autocomplete for 'cat' command in articles directory
+      if (parts[0] === 'cat' && currentPath[0] === 'articles') {
+        const partial = parts.slice(1).join(' ');
+
+        // Get all article filenames and titles without emojis
+        const matches = Object.entries(articles)
+          .map(([filename, article]) => ({
+            filename,
+            title: article.title,
+            titleNoEmoji: stripEmoji(article.title),
+            emoji: article.emoji
+          }))
+          .filter(item =>
+            item.titleNoEmoji.toLowerCase().startsWith(partial.toLowerCase()) ||
+            item.filename.toLowerCase().startsWith(partial.toLowerCase())
+          );
+
+        if (matches.length === 1) {
+          // Single match - autocomplete it
+          return `cat ${matches[0].filename}`;
+        } else if (matches.length > 1) {
+          // Multiple matches - show options
+          const output = document.getElementById('terminalOutput');
+          output.textContent += `\nMatching articles:\n`;
+          matches.forEach(m => {
+            output.textContent += `  ${m.emoji} ${m.titleNoEmoji} (${m.filename})\n`;
+          });
+          output.textContent += '\n';
+          output.classList.add('show');
+          output.scrollTop = output.scrollHeight;
+          return input; // Keep current input
+        }
+      }
+
+      return input; // No autocomplete available
+    }
+
+    // Handle terminal input
+    document.getElementById('terminalInput').addEventListener('keydown', function(e) {
+      // Handle Tab key for autocomplete
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        playClick();
+        const completed = handleTabComplete(this.value);
+        this.value = completed;
+        return;
+      }
+
+      // Play typing sound for most keys
+      if (e.key.length === 1) {
+        playType();
+      }
+
+      if (e.key === 'Enter') {
+        playCommand(); // Play command execution sound
+        const input = this.value.trim();
+        const [command, ...args] = input.split(' ');
+        const output = document.getElementById('terminalOutput');
+
+        if (input) {
+          // Show the command that was entered
+          output.textContent += `posixparty@kingsport:~$ ${input}\n`;
+          output.classList.add('show');
+
+          if (commands[command]) {
+            const result = commands[command](args.join(' '));
+            if (result && command !== 'clear') {
+              output.textContent += result + '\n\n';
+            }
+            if (command === 'clear') {
+              output.textContent = '';
+              output.classList.remove('show');
+            }
+          } else {
+            output.textContent += `Command not found: ${command}. Type 'help' for available commands.\n\n`;
+          }
+
+          // Scroll to bottom
+          output.scrollTop = output.scrollHeight;
+        }
+
+        this.value = '';
+      }
+    });
+
+    // Original functions
+    function launchTerminal(url) {
+      const terminal = document.getElementById('terminal');
+      const box = document.getElementById('terminal-box');
+      const messages = [
+        '> deflecting spiritual malware...',
+        '> blessing packets...',
+        '> negotiating secure socket handshake...',
+        '> tunneling through firewall...',
+        '> rewriting bash history...'
+      ];
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+      terminal.style.display = 'flex';
+      box.textContent = '> connecting to ' + url + '...';
+      playCommand();
+      setTimeout(() => { box.textContent += '\n> handshaking...'; playType(); }, 800);
+      setTimeout(() => { box.textContent += '\n' + randomMessage; playType(); }, 1600);
+      setTimeout(() => { box.textContent += '\n> launching portal...'; playCommand(); }, 2400);
+      setTimeout(() => {
+        window.open(url, '_blank');
+        terminal.style.display = 'none';
+        playWhoosh();
+      }, 3400);
+    }
+
+    // Audio controls
+    const audioEl = document.getElementById('bgAudio');
+    const slider = document.getElementById('volumeSlider');
+    const btn = document.getElementById('playBtn');
+    const progress = document.getElementById('progressBar');
+    const marqueeText = document.getElementById('marqueeText');
+    let hasPlayed = false;
+
+    if (audioEl) {
+      audioEl.volume = slider.value;
+
+      const startPlaying = () => {
+        if (!hasPlayed) {
+          marqueeText.textContent = '> Monthly GNU/Linux Meetup @ The Inventor Center, Kingsport, TN - Where POSIX compliance is the life of the party! 🎉';
+          hasPlayed = true;
+        }
+        marqueeText.classList.add('scrolling');
+      };
+
+      const stopPlaying = () => {
+        marqueeText.classList.remove('scrolling');
+      };
+
+      btn.addEventListener('click', () => {
+        if (audioEl.paused) {
+          audioEl.play();
+          btn.textContent = '=';
+          startPlaying();
+        }
+        else {
+          audioEl.pause();
+          btn.textContent = '>';
+          stopPlaying();
+        }
+        audioEl.muted = false;
+      });
+      slider.addEventListener('input', () => {
+        if (audioEl.paused) {
+          audioEl.play();
+          btn.textContent = '=';
+          startPlaying();
+        }
+        audioEl.muted = false;
+        audioEl.volume = slider.value;
+      });
+      audioEl.addEventListener('timeupdate', () => {
+        if (audioEl.duration) { progress.value = audioEl.currentTime / audioEl.duration; }
+      });
+    }
+
+    // Load articles on page load
+    loadArticles().then(() => {
+      // Only navigate to home if no hash routing was handled
+      if (!window.location.hash) {
+        setTimeout(() => {
+          navigate('home');
+        }, 100);
+      }
+    });
+
+    // Handle URL hash routing for direct article links
+    let isHandlingHash = false; // Prevent multiple simultaneous hash handling
+    
+    function handleHashRoute() {
+      if (isHandlingHash) return; // Prevent recursive calls
+      
+      const hash = window.location.hash.slice(1); // Remove the #
+      if (hash) {
+        isHandlingHash = true;
+        const [section, filename] = hash.split('/');
+        
+        if (section === 'articles' && filename) {
+          // Navigate to articles section first
+          navigate('articles');
+          // Then show the specific article
+          setTimeout(() => {
+            if (articles[filename]) {
+              showArticle(filename, articles[filename]);
+            }
+            isHandlingHash = false;
+          }, 300);
+        } else if (section === 'sponsors' && filename) {
+          // Navigate to sponsors section first
+          navigate('sponsors');
+          // Then show the specific sponsor
+          setTimeout(() => {
+            if (sponsors[filename]) {
+              showArticle(filename, sponsors[filename]);
+            }
+            isHandlingHash = false;
+          }, 300);
+        } else if (section === 'articles' && !filename) {
+          // Just navigate to articles section
+          navigate('articles');
+          isHandlingHash = false;
+        } else if (section === 'projects' && !filename) {
+          // Just navigate to projects section
+          navigate('projects');
+          isHandlingHash = false;
+        } else {
+          isHandlingHash = false;
+        }
+      } else {
+        isHandlingHash = false;
+      }
+    }
+
+    let isProgrammaticNavigation = false; // Flag to prevent popstate loops
+    
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', function() {
+      if (isProgrammaticNavigation) return; // Skip if we're programmatically updating hash
+      
+      const hash = window.location.hash.slice(1);
+      if (hash) {
+        const [section, filename] = hash.split('/');
+        
+        if (section === 'articles' && filename && articles[filename]) {
+          navigate('articles');
+          setTimeout(() => {
+            showArticle(filename, articles[filename]);
+          }, 100);
+        } else if (section === 'projects' && filename && projects[filename]) {
+          navigate('projects');
+          setTimeout(() => {
+            showArticle(filename, projects[filename]);
+          }, 100);
+        } else if (section === 'articles') {
+          navigate('articles');
+        } else if (section === 'projects') {
+          navigate('projects');
+        }
+      } else {
+        // Going back to home
+        navigate('home');
+      }
+    });
+
+
+    // Focus terminal input on page load
+    document.getElementById('terminalInput').focus();
+
+    // Focus Mode functionality
+    let focusMode = localStorage.getItem('focusMode') === 'true';
+    const focusToggle = document.getElementById('focusToggle');
+
+    function toggleFocusMode() {
+      focusMode = !focusMode;
+      localStorage.setItem('focusMode', focusMode);
+      updateFocusMode();
+    }
+
+    function updateFocusMode() {
+      if (focusMode) {
+        document.body.classList.add('focus-mode');
+        focusToggle.classList.add('active');
+        focusToggle.textContent = '🌟 Normal Mode';
+        showFocusToggle(); // Always show toggle when focus mode is active
+      } else {
+        document.body.classList.remove('focus-mode');
+        focusToggle.classList.remove('active');
+        focusToggle.textContent = '🎯 Focus Mode';
+        // Only hide toggle if we're not viewing an article
+        if (currentView !== 'article' && currentPath.length <= 1) {
+          hideFocusToggle();
+        }
+      }
+    }
+
+    function showFocusToggle() {
+      focusToggle.style.display = 'block';
+    }
+
+    function hideFocusToggle() {
+      focusToggle.style.display = 'none';
+    }
+
+    focusToggle.addEventListener('click', toggleFocusMode);
+
+    // Initialize focus mode state
+    updateFocusMode();
+
+    // Matrix Rain Effect
+    let matrixInterval = null;
+
+    function showMatrixModal() {
+      const modal = document.getElementById('matrixModal');
+      modal.classList.add('active');
+
+      setTimeout(() => {
+        modal.classList.remove('active');
+        startMatrixRain();
+      }, 3000);
+    }
+
+    function startMatrixRain() {
+      const canvas = document.getElementById('matrixCanvas');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.classList.add('active');
+
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
+      const fontSize = 14;
+      const columns = canvas.width / fontSize;
+      const drops = [];
+
+      for (let i = 0; i < columns; i++) {
+        drops[i] = 1;
+      }
+
+      function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#00ff9f';
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+      }
+
+      matrixInterval = setInterval(draw, 33);
+    }
+
+    function stopMatrixRain() {
+      const canvas = document.getElementById('matrixCanvas');
+      canvas.classList.remove('active');
+      if (matrixInterval) {
+        clearInterval(matrixInterval);
+        matrixInterval = null;
+      }
+    }
+
+    // ESC key to stop matrix
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        stopMatrixRain();
+      }
+    });
+
+    // Web Audio API for sound effects
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Create white noise buffer for harshness
+    function createNoiseBuffer(duration = 0.02) {
+      const bufferSize = audioContext.sampleRate * duration;
+      const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      return buffer;
+    }
+
+    // Mechanical click sound (low frequency with noise)
+    function playClick() {
+      // Oscillator for tone
+      const oscillator = audioContext.createOscillator();
+      const oscGain = audioContext.createGain();
+
+      // Noise for harshness
+      const noise = audioContext.createBufferSource();
+      const noiseGain = audioContext.createGain();
+      const noiseFilter = audioContext.createBiquadFilter();
+
+      noise.buffer = createNoiseBuffer(0.015);
+      noiseFilter.type = 'lowpass';
+      noiseFilter.frequency.value = 400;
+
+      oscillator.connect(oscGain);
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      oscGain.connect(audioContext.destination);
+      noiseGain.connect(audioContext.destination);
+
+      oscillator.frequency.value = 250 + Math.random() * 100; // 250-350Hz
+      oscillator.type = 'square';
+
+      oscGain.gain.setValueAtTime(0.12, audioContext.currentTime);
+      oscGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.015);
+
+      noiseGain.gain.setValueAtTime(0.08, audioContext.currentTime);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.015);
+
+      oscillator.start(audioContext.currentTime);
+      noise.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.015);
+      noise.stop(audioContext.currentTime + 0.015);
+    }
+
+    // Typing sound (low mechanical with noise)
+    function playType() {
+      const oscillator = audioContext.createOscillator();
+      const oscGain = audioContext.createGain();
+
+      const noise = audioContext.createBufferSource();
+      const noiseGain = audioContext.createGain();
+      const noiseFilter = audioContext.createBiquadFilter();
+
+      noise.buffer = createNoiseBuffer(0.01);
+      noiseFilter.type = 'lowpass';
+      noiseFilter.frequency.value = 300;
+
+      oscillator.connect(oscGain);
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      oscGain.connect(audioContext.destination);
+      noiseGain.connect(audioContext.destination);
+
+      const pitch = 180 + Math.random() * 240; // 180-420Hz
+      oscillator.frequency.value = pitch;
+      oscillator.type = 'square';
+
+      oscGain.gain.setValueAtTime(0.06, audioContext.currentTime);
+      oscGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.01);
+
+      noiseGain.gain.setValueAtTime(0.05, audioContext.currentTime);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.01);
+
+      oscillator.start(audioContext.currentTime);
+      noise.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.01);
+      noise.stop(audioContext.currentTime + 0.01);
+    }
+
+    // Command execution sound (deep thunk with noise)
+    function playCommand() {
+      const oscillator = audioContext.createOscillator();
+      const oscGain = audioContext.createGain();
+
+      const noise = audioContext.createBufferSource();
+      const noiseGain = audioContext.createGain();
+      const noiseFilter = audioContext.createBiquadFilter();
+
+      noise.buffer = createNoiseBuffer(0.05);
+      noiseFilter.type = 'lowpass';
+      noiseFilter.frequency.value = 200;
+
+      oscillator.connect(oscGain);
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      oscGain.connect(audioContext.destination);
+      noiseGain.connect(audioContext.destination);
+
+      oscillator.frequency.value = 100;
+      oscillator.type = 'square';
+
+      oscGain.gain.setValueAtTime(0.15, audioContext.currentTime);
+      oscGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+
+      noiseGain.gain.setValueAtTime(0.1, audioContext.currentTime);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+
+      oscillator.start(audioContext.currentTime);
+      noise.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.05);
+      noise.stop(audioContext.currentTime + 0.05);
+    }
+
+    // Navigation sound (low sweep with noise)
+    function playWhoosh() {
+      const oscillator = audioContext.createOscillator();
+      const oscGain = audioContext.createGain();
+
+      const noise = audioContext.createBufferSource();
+      const noiseGain = audioContext.createGain();
+      const noiseFilter = audioContext.createBiquadFilter();
+
+      noise.buffer = createNoiseBuffer(0.1);
+      noiseFilter.type = 'lowpass';
+      noiseFilter.frequency.value = 350;
+
+      oscillator.connect(oscGain);
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      oscGain.connect(audioContext.destination);
+      noiseGain.connect(audioContext.destination);
+
+      oscillator.frequency.setValueAtTime(420, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.1);
+      oscillator.type = 'sawtooth';
+
+      oscGain.gain.setValueAtTime(0.05, audioContext.currentTime);
+      oscGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+      noiseGain.gain.setValueAtTime(0.04, audioContext.currentTime);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+      oscillator.start(audioContext.currentTime);
+      noise.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+      noise.stop(audioContext.currentTime + 0.1);
+    }
+
+    // Astronomical calculations for live sky
+    let observerLat = 0; // Default to equator
+    let observerLon = 0;
+    let observerLocation = "Equator";
+
+    // Calculate Julian Date from JavaScript Date
+    function getJulianDate(date) {
+      return (date.getTime() / 86400000) + 2440587.5;
+    }
+
+    // Calculate Greenwich Mean Sidereal Time (GMST)
+    function getGMST(date) {
+      const jd = getJulianDate(date);
+      const d = jd - 2451545.0;
+      let gmst = 18.697374558 + 24.06570982441908 * d;
+      gmst = gmst % 24;
+      if (gmst < 0) gmst += 24;
+      return gmst;
+    }
+
+    // Calculate Local Sidereal Time (LST)
+    function getLST(date, longitude) {
+      const gmst = getGMST(date);
+      let lst = gmst + (longitude / 15.0);
+      lst = lst % 24;
+      if (lst < 0) lst += 24;
+      return lst;
+    }
+
+    // Format LST as HH:MM:SS
+    function formatLST(lst) {
+      const hours = Math.floor(lst);
+      const minutes = Math.floor((lst - hours) * 60);
+      const seconds = Math.floor(((lst - hours) * 60 - minutes) * 60);
+      return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    // Convert RA/Dec to Altitude/Azimuth
+    function raDecToAltAz(ra, dec, lst, lat) {
+      // Convert to radians
+      const raRad = ra * Math.PI / 180;
+      const decRad = dec * Math.PI / 180;
+      const latRad = lat * Math.PI / 180;
+      const lstRad = lst * 15 * Math.PI / 180; // LST in hours to degrees to radians
+
+      // Hour Angle
+      const ha = lstRad - raRad;
+
+      // Calculate altitude
+      const sinAlt = Math.sin(decRad) * Math.sin(latRad) +
+                     Math.cos(decRad) * Math.cos(latRad) * Math.cos(ha);
+      const alt = Math.asin(sinAlt) * 180 / Math.PI;
+
+      // Calculate azimuth
+      const cosAz = (Math.sin(decRad) - Math.sin(latRad) * sinAlt) /
+                    (Math.cos(latRad) * Math.cos(Math.asin(sinAlt)));
+      let az = Math.acos(Math.max(-1, Math.min(1, cosAz))) * 180 / Math.PI;
+      if (Math.sin(ha) > 0) az = 360 - az;
+
+      return { altitude: alt, azimuth: az };
+    }
+
+    // Try to get user's location
+    function initGeolocation() {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            observerLat = position.coords.latitude;
+            observerLon = position.coords.longitude;
+            observerLocation = `${observerLat.toFixed(2)}°, ${observerLon.toFixed(2)}°`;
+            document.getElementById('location').textContent = observerLocation;
+            console.log(`Observer location: ${observerLocation}`);
+            updateStarPositions();
+          },
+          (error) => {
+            console.log('Geolocation not available, using equator', error);
+            document.getElementById('location').textContent = observerLocation;
+            updateStarPositions();
+          }
+        );
+      } else {
+        console.log('Geolocation not supported');
+        document.getElementById('location').textContent = observerLocation;
+        updateStarPositions();
+      }
+    }
+
+    // Store star catalog data globally
+    let starCatalog = null;
+
+    // Create twinkling jewel-toned stars with parallax
+    async function createStars() {
+      const stars = [];
+
+      // Try to load real star catalog
+      try {
+        const response = await fetch('stars.json');
+        if (response.ok) {
+          const catalog = await response.json();
+          starCatalog = catalog.stars;
+          console.log(`Loaded ${starCatalog.length} real stars from catalog`);
+        }
+      } catch (error) {
+        console.log('Could not load star catalog, using random stars', error);
+      }
+
+      // If we have real star data, render it
+      if (starCatalog) {
+        // First, add the real bright stars from the catalog
+        starCatalog.forEach((starInfo, index) => {
+          const star = document.createElement('div');
+          star.className = `star star-${starInfo.color}`;
+          star.title = starInfo.name; // Show star name on hover
+
+          // Store star data for live updates
+          star.dataset.ra = starInfo.ra;
+          star.dataset.dec = starInfo.dec;
+          star.dataset.mag = starInfo.mag;
+          star.dataset.name = starInfo.name;
+
+          // Size based on magnitude (brighter = larger)
+          const size = Math.max(1.5, 5 - starInfo.mag * 0.8);
+          star.style.width = size + 'px';
+          star.style.height = size + 'px';
+
+          // Layer based on magnitude (brighter stars in foreground)
+          const layer = starInfo.mag < 1 ? 3 : (starInfo.mag < 2 ? 2 : 1);
+          star.classList.add(`layer-${layer}`);
+          star.dataset.layer = layer;
+
+          // Random animation delay for staggered twinkling
+          star.style.animationDelay = Math.random() * 6 + 's';
+
+          // Initially hidden until position calculated
+          star.style.display = 'none';
+
+          document.body.appendChild(star);
+          stars.push(star);
+        });
+
+        // Add procedural fainter background stars for visual density
+        // These follow astronomical positioning but represent dimmer stars
+        const numBackgroundStars = 400;
+        const starTypes = ['emerald', 'sapphire', 'ruby', 'amethyst', 'topaz', 'aquamarine'];
+
+        for (let i = 0; i < numBackgroundStars; i++) {
+          const star = document.createElement('div');
+          const color = starTypes[Math.floor(Math.random() * starTypes.length)];
+          star.className = `star star-${color}`;
+
+          // Generate realistic celestial coordinates
+          const ra = Math.random() * 360; // Right Ascension: 0-360 degrees
+          const dec = (Math.random() * 180) - 90; // Declination: -90 to +90 degrees
+          const mag = 3 + Math.random() * 3; // Fainter magnitudes: 3-6
+
+          // Store star data for live updates
+          star.dataset.ra = ra;
+          star.dataset.dec = dec;
+          star.dataset.mag = mag;
+          star.dataset.name = `Faint Star ${i}`;
+
+          // Smaller size for fainter stars
+          const size = Math.max(0.8, 2 - (mag - 3) * 0.3);
+          star.style.width = size + 'px';
+          star.style.height = size + 'px';
+
+          // Background layer
+          star.classList.add('layer-1');
+          star.dataset.layer = 1;
+
+          // Random animation delay for staggered twinkling
+          star.style.animationDelay = Math.random() * 6 + 's';
+
+          // Initially hidden until position calculated
+          star.style.display = 'none';
+
+          document.body.appendChild(star);
+          stars.push(star);
+        }
+      } else {
+        // Fallback: Create random stars
+        const starTypes = ['emerald', 'sapphire', 'ruby', 'amethyst', 'topaz', 'aquamarine'];
+        const numStars = 300;
+
+        for (let i = 0; i < numStars; i++) {
+          const star = document.createElement('div');
+          star.className = `star star-${starTypes[Math.floor(Math.random() * starTypes.length)]}`;
+
+          const layer = Math.floor(Math.random() * 3) + 1;
+          star.classList.add(`layer-${layer}`);
+
+          const left = Math.random() * 100;
+          const top = Math.random() * 100;
+          star.style.left = left + '%';
+          star.style.top = top + '%';
+
+          const size = Math.random() * 2 + 1;
+          star.style.width = size + 'px';
+          star.style.height = size + 'px';
+
+          star.style.animationDelay = Math.random() * 6 + 's';
+
+          star.dataset.layer = layer;
+          star.dataset.initialLeft = left;
+          star.dataset.initialTop = top;
+
+          document.body.appendChild(star);
+          stars.push(star);
+        }
+      }
+
+      return stars;
+    }
+
+    // Update star positions based on current time and observer location
+    function updateStarPositions() {
+      if (!starCatalog) return;
+
+      const now = new Date();
+      const lst = getLST(now, observerLon);
+
+      // Update LST display
+      document.getElementById('lstTime').textContent = formatLST(lst);
+
+      // Get all star elements
+      const starElements = document.querySelectorAll('.star[data-ra]');
+      let visibleCount = 0;
+
+      starElements.forEach(star => {
+        const ra = parseFloat(star.dataset.ra);
+        const dec = parseFloat(star.dataset.dec);
+
+        // Convert to altitude/azimuth
+        const altAz = raDecToAltAz(ra, dec, lst, observerLat);
+
+        // Only show stars above horizon (altitude > 0)
+        if (altAz.altitude > 0) {
+          visibleCount++;
+          star.style.display = 'block';
+
+          // Use fisheye/azimuthal equidistant projection (like a planetarium dome)
+          // Center of screen = zenith (altitude 90°), edges = horizon (altitude 0°)
+          // This is astronomically accurate and fills the whole screen!
+
+          // Distance from center based on altitude
+          // altitude 90° (zenith) = center, altitude 0° (horizon) = edge at 50% radius
+          const radius = (1 - altAz.altitude / 90) * 50; // 0-50% from center
+
+          // Convert azimuth to radians (0° = North = up on screen)
+          const azimuthRad = altAz.azimuth * Math.PI / 180;
+
+          // Convert polar coordinates to screen position
+          // Azimuth 0° = North = top (negative y direction)
+          // Azimuth 90° = East = right (positive x direction)
+          const left = 50 + radius * Math.sin(azimuthRad);
+          const top = 50 - radius * Math.cos(azimuthRad);
+
+          star.style.left = left + '%';
+          star.style.top = top + '%';
+
+          // Store for parallax
+          star.dataset.initialLeft = left;
+          star.dataset.initialTop = top;
+        } else {
+          star.style.display = 'none';
+        }
+      });
+
+      // Update visible star count
+      document.getElementById('visibleStars').textContent = visibleCount;
+
+      console.log(`LST: ${formatLST(lst)}, Visible stars: ${visibleCount}/${starCatalog.length}`);
+    }
+
+    // Update star positions every second
+    function startLiveSky() {
+      updateStarPositions();
+      setInterval(updateStarPositions, 1000); // Update every second
+    }
+
+    // Initialize stars asynchronously
+    let stars = [];
+    createStars().then(starArray => {
+      stars = starArray;
+      // Initialize geolocation and start live sky
+      initGeolocation();
+      startLiveSky();
+    });
+
+    // Parallax scroll effect
+    let ticking = false;
+    window.addEventListener('scroll', function() {
+      if (!ticking) {
+        window.requestAnimationFrame(function() {
+          const scrolled = window.pageYOffset;
+
+          stars.forEach(star => {
+            const layer = parseInt(star.dataset.layer);
+            const speed = layer * 0.15; // Different speeds for depth
+            const initialTop = parseFloat(star.dataset.initialTop);
+
+            // Move stars at different speeds based on layer
+            const newTop = initialTop - (scrolled * speed / 10);
+            star.style.transform = `translateY(${scrolled * speed / 10}px)`;
+          });
+
+          ticking = false;
+        });
+
+        ticking = true;
+      }
+    });
+
+    // Create shooting stars occasionally
+    function createShootingStar() {
+      const shootingStar = document.createElement('div');
+      shootingStar.className = 'shooting-star';
+
+      // Random starting position (top right area)
+      const startX = Math.random() * window.innerWidth * 0.5 + window.innerWidth * 0.5;
+      const startY = Math.random() * window.innerHeight * 0.3;
+
+      shootingStar.style.left = startX + 'px';
+      shootingStar.style.top = startY + 'px';
+
+      document.body.appendChild(shootingStar);
+
+      // Trigger animation (faster - 0.8 seconds)
+      setTimeout(() => {
+        shootingStar.style.animation = 'shoot 0.8s linear forwards';
+      }, 10);
+
+      // Remove after animation
+      setTimeout(() => {
+        shootingStar.remove();
+      }, 900);
+    }
+
+    // Create shooting stars at random intervals (every 20-40 seconds)
+    function scheduleShootingStar() {
+      const delay = Math.random() * 20000 + 20000; // 20-40 seconds
+      setTimeout(() => {
+        createShootingStar();
+        scheduleShootingStar(); // Schedule next one
+      }, delay);
+    }
+
+    // Start the shooting star cycle
+    scheduleShootingStar();
+  </script>
+</body>
+</html>
