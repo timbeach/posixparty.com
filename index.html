@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Posix Party - GNU/Linux Meetup in Kingsport, TN</title>
+  <title>Posix Party</title>
 
   <!-- Open Graph / Social Media Preview -->
   <meta property="og:title" content="Posix Party" />
-  <meta property="og:description" content="Monthly GNU/Linux meetup at The Inventor Center in Kingsport, TN - where POSIX compliance is the life of the party" />
+  <meta property="og:description" content="Where POSIX compliance is the life of the party" />
   <meta property="og:url" content="https://posixparty.com" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Posix Party" />
@@ -15,7 +15,7 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Posix Party" />
-  <meta name="twitter:description" content="Monthly GNU/Linux meetup at The Inventor Center in Kingsport, TN - where POSIX compliance is the life of the party" />
+  <meta name="twitter:description" content="Where POSIX compliance is the life of the party" />
 
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
@@ -366,6 +366,10 @@
       position: relative; overflow-x: hidden;
       max-width: 100vw;
     }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
     header {
       text-align: center;
       padding: 2rem 1rem 1rem;
@@ -544,7 +548,9 @@
       .container {
         margin: 1rem;
         padding: 1rem;
-        max-width: none;
+        max-width: 100%;
+        overflow-x: hidden;
+        word-wrap: break-word;
       }
 
       header {
@@ -595,6 +601,17 @@
       .play-btn {
         padding: 0.25rem 0.5rem;
         font-size: 1rem;
+      }
+
+      /* Article content for tablets */
+      .article-content pre {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .article-content pre code {
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
     }
 
@@ -652,6 +669,45 @@
 
       .marquee {
         font-size: 0.9rem;
+      }
+
+      /* Article content mobile fixes */
+      .article-content {
+        font-size: 1rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      .article-content pre {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .article-content pre code {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        word-break: break-word;
+        font-size: 0.8rem;
+      }
+
+      .article-content code {
+        font-size: 0.85rem;
+        word-break: break-word;
+      }
+
+      .article-content img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .article-content h2 {
+        font-size: 1.3rem;
+      }
+
+      .article-content h3 {
+        font-size: 1.1rem;
       }
     }
     #content {
@@ -1256,7 +1312,7 @@
     <div class="terminal-nav">
       <div class="breadcrumb" id="breadcrumb">~/posixparty.com</div>
       <div style="display: flex; align-items: center;">
-        <span class="terminal-prompt">posixparty@kingsport:~$</span>
+        <span class="terminal-prompt">posixparty:~$</span>
         <input type="text" class="terminal-input" id="terminalInput" placeholder="type 'help'">
       </div>
       <div class="terminal-output" id="terminalOutput"></div>
@@ -1319,7 +1375,7 @@
   <script>
     // Articles will be loaded from external files
     let articles = {};
-    let sponsors = {};
+    let sponsors = {}; // Reserved for future use
 
     // Load articles index and content
     async function loadArticles() {
@@ -1349,15 +1405,6 @@
               navigate('articles');
               setTimeout(() => {
                 showArticle(filename, articles[filename]);
-              }, 100);
-            }, 100);
-            return; // Don't run the normal home navigation
-          } else if (section === 'sponsors' && filename && sponsors[filename]) {
-            // Navigate to sponsors and show the specific sponsor
-            setTimeout(() => {
-              navigate('sponsors');
-              setTimeout(() => {
-                showArticle(filename, sponsors[filename]);
               }, 100);
             }, 100);
             return; // Don't run the normal home navigation
@@ -1405,94 +1452,8 @@ Aegix Linux exemplifies parsimony by employing a streamlined approach to its arc
       }
     }
 
-    // Sponsors data
-    sponsors = {
-      'The Inventor Center': {
-        title: 'The Inventor Center - Kingsport, TN',
-        content: `
-# The Inventor Center
-
-**Location**: Kingsport, Tennessee
-**Website**: [theinventorcenter.com](https://theinventorcenter.com)
-
-## About
-
-The Inventor Center is a makerspace and innovation hub in Kingsport, TN, providing tools, resources, and community space for makers, tinkerers, and creators.
-
-## What They Offer
-
-- **Makerspace** - Access to tools, 3D printers, electronics lab, and more
-- **Workshops** - Regular classes and training sessions
-- **Community Events** - Meetups, hackathons, and social gatherings
-- **Collaboration Space** - Work alongside other creative minds
-
-## Posix Party @ The Inventor Center
-
-The Inventor Center graciously hosts our monthly Posix Party GNU/Linux meetup, providing:
-- Meeting space for our community
-- Access to their facilities and resources
-- A welcoming environment for learning and collaboration
-
-We're grateful for their support of open source and the local tech community!
-
-*Visit [theinventorcenter.com](https://theinventorcenter.com) to learn more about membership and upcoming events.*
-        `,
-        date: '2025-10-01'
-      },
-      'Aegix Linux': {
-        title: 'Aegix Linux',
-        content: `
-# Aegix Linux
-
-**Website**: [aegixlinux.org](https://aegixlinux.org)
-
-## About
-
-A GNU/Linux distribution built with parsimony, purpose, and love for the craft.
-
-## Key Features
-
-- **Lightweight** - Based on Artix Linux with Runit init system
-- **Developer-focused** - Pre-configured for software development
-- **Suckless tools** - dwm, dmenu, st, and other minimalist tools
-- **Encrypted by default** - Security-first approach
-- **Community-driven** - Built by users, for users
-
-## Philosophy
-
-Technology should serve human flourishing. Aegix Linux embodies this through simplicity, transparency, and respect for user freedom.
-
-*Visit [aegixlinux.org](https://aegixlinux.org) to download and learn more.*
-        `,
-        date: '2025-10-01'
-      },
-      'timbeach.com': {
-        title: 'Timothy D Beach',
-        content: `
-# Timothy D Beach
-
-**Website**: [timbeach.com](https://timbeach.com)
-
-## About
-
-Software engineer, recording artist, and GNU/Linux enthusiast - building things with purpose.
-
-## Projects
-
-- **Aegix Linux** - Founder and lead developer
-- **Web Development** - Full-stack engineering
-- **Audio Engineering** - Music production and recording
-- **Open Source** - Contributions to the FOSS community
-
-## Posix Party
-
-Tim organizes and hosts the monthly Posix Party GNU/Linux meetup in Kingsport, TN, sharing knowledge and fostering community around open source technologies.
-
-*Visit [timbeach.com](https://timbeach.com) to learn more about Tim's work.*
-        `,
-        date: '2025-10-01'
-      }
-    };
+    // Sponsors data - cleared for pivot
+    sponsors = {};
 
     let currentPath = [];
     let currentView = 'home';
@@ -1512,19 +1473,15 @@ Tim organizes and hosts the monthly Posix Party GNU/Linux meetup in Kingsport, T
       
       ls: () => {
         if (currentPath.length === 0) {
-          return `Recent Articles:
-${getRecentArticles(3).map(([filename, article]) => `  ${article.emoji} ${article.title}`).join('\n')}
+          const recentArticles = getRecentArticles(3);
+          const articlesSection = recentArticles.length > 0 ? `Recent Articles:
+${recentArticles.map(([filename, article]) => `  ${article.emoji} ${article.title}`).join('\n')}
 
-Resources:
-  🏛️ The Inventor Center (https://theinventorcenter.com)
-  🐧 GNU/Linux Resources (coming soon)
-
-Directories:
+` : '';
+          return `${articlesSection}Directories:
   articles/`;
         } else if (currentPath[0] === 'articles') {
           return Object.keys(articles).join('    ');
-        } else if (currentPath[0] === 'sponsors') {
-          return Object.keys(sponsors).join('    ');
         }
         return 'Directory not found';
       },
@@ -1544,9 +1501,6 @@ Directories:
         } else if (dir === 'articles' && currentPath.length === 0) {
           navigate('articles');
           return 'Entered articles directory';
-        } else if (dir === 'sponsors' && currentPath.length === 0) {
-          navigate('sponsors');
-          return 'Entered sponsors directory';
         }
         return `Directory '${dir}' not found`;
       },
@@ -1555,9 +1509,6 @@ Directories:
         if (currentPath[0] === 'articles' && articles[file]) {
           showArticle(file, articles[file]);
           return `Fetching ${file} from server...`;
-        } else if (currentPath[0] === 'sponsors' && sponsors[file]) {
-          showArticle(file, sponsors[file]);
-          return `Loading ${file}...`;
         }
         return `File '${file}' not found`;
       },
@@ -1567,7 +1518,7 @@ Directories:
         return '';
       },
       
-      whoami: () => 'Posix Party - Monthly GNU/Linux Meetup in Kingsport, TN',
+      whoami: () => 'Posix Party - Where POSIX compliance is the life of the party',
       
       pwd: () => '~/' + currentPath.join('/'),
       
@@ -1583,9 +1534,6 @@ Directories:
         return `~/posixparty.com
 ├── Recent Articles
 │   ${recentArticles.map(([file, article]) => `├── ${article.emoji} ${article.title}`).join('\n│   ')}
-├── Resources
-│   ├── 🏛️ The Inventor Center (external)
-│   └── 🐧 GNU/Linux Resources (coming soon)
 └── articles/
     ${sortedArticles.map(file => `├── ${file}`).join('\n    ')}`;
       },
@@ -1746,21 +1694,7 @@ God Mode: ON
         // Get 3 most recent articles
         const recentArticles = getRecentArticles(3);
 
-        content.innerHTML = `
-          <!-- HIRE ME SECTION - Commented out for future revamp
-          <div class="content">
-            <h2>🎉 Join Us</h2>
-            <div class="hire-me-section">
-              <p>Monthly GNU/Linux meetup at The Inventor Center in Kingsport, TN. All skill levels welcome!</p>
-              <div class="contact-links">
-                <a href="https://theinventorcenter.com/" target="_blank" class="contact-btn">🏛️ The Inventor Center</a>
-                <a href="mailto:contact@posixparty.com" class="contact-btn">📧 Contact</a>
-              </div>
-            </div>
-          </div>
-          <div class="content">
-            <hr>
-          -->
+        const articlesHtml = recentArticles.length > 0 ? `
           <div class="content">
             <h2>Recent Articles</h2>
             <ul class="file-list">
@@ -1780,36 +1714,14 @@ God Mode: ON
             </ul>
             <p><a href="#" onclick="navigate('articles'); return false;" style="color: var(--foreground);">View all articles →</a></p>
           </div>
+        ` : '';
+
+        content.innerHTML = `
           <div class="content">
-            <hr>
-            <h2>Sponsored By</h2>
-            <ul class="file-list">
-              <li class="file-item executable" onclick="launchTerminal('https://theinventorcenter.com')">🛠️ The Inventor Center
-                <span class="subtext">Makerspace & Innovation Hub - Kingsport, TN</span>
-                <div class="preview-card">
-                  <img src="pix/inventor-center.webp" alt="The Inventor Center" class="project-image">
-                  <h3>The Inventor Center</h3>
-                  <div class="excerpt">Makerspace and innovation hub in Kingsport, TN. A collaborative space for makers, tinkerers, and innovators.</div>
-                </div>
-              </li>
-              <li class="file-item executable" onclick="launchTerminal('https://aegixlinux.org')">🐧 Aegix Linux
-                <span class="subtext">GNU/Linux distribution built with parsimony</span>
-                <div class="preview-card">
-                  <img src="pix/mr-robot-mask.png" alt="Aegix Linux" class="project-image">
-                  <h3>Aegix Linux</h3>
-                  <div class="excerpt">A GNU/Linux distribution built with love, purpose, and parsimony. Lightweight, developer-focused, and thoughtfully crafted.</div>
-                </div>
-              </li>
-              <li class="file-item executable" onclick="launchTerminal('https://timbeach.com')">💖 Timothy D Beach
-                <span class="subtext">Software engineer & GNU/Linux enthusiast</span>
-                <div class="preview-card">
-                  <img src="pix/space-guitar.png" alt="Timothy D Beach" class="project-image">
-                  <h3>Timothy D Beach</h3>
-                  <div class="excerpt">Software engineer, GNU/Linux enthusiast, and recording artist. Building things with code and sound.</div>
-                </div>
-              </li>
-            </ul>
+            <p style="color: var(--foreground); font-family: 'Share Tech Mono', monospace; font-size: 1.1rem; line-height: 1.8; margin: 2rem 0;">Where POSIX compliance is the life of the party.</p>
+            <p style="color: var(--highlight); font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; opacity: 0.7;">Something new is coming. Stay tuned.</p>
           </div>
+          ${articlesHtml}
         `;
       } else if (section === 'articles') {
         currentPath = ['articles'];
@@ -1871,25 +1783,6 @@ God Mode: ON
             }
           });
         });
-      } else if (section === 'sponsors') {
-        currentPath = ['sponsors'];
-        currentView = 'sponsors';
-        breadcrumb.textContent = '~/posixparty.com/sponsors';
-        // Update URL hash for sponsors section
-        isProgrammaticNavigation = true;
-        window.location.hash = 'sponsors';
-        setTimeout(() => {
-          isProgrammaticNavigation = false;
-        }, 100);
-        content.innerHTML = `
-          <button class="back-btn" onclick="navigate('home')">← back</button>
-          <h2>Sponsored By</h2>
-          <ul class="file-list">
-            ${Object.keys(sponsors).map(file =>
-              `<li class="file-item article" onclick="showArticle('${file}', sponsors['${file}'])">${file}</li>`
-            ).join('')}
-          </ul>
-        `;
       }
 
       // Fade in new content
@@ -1914,8 +1807,6 @@ God Mode: ON
       let section = 'articles';
       if (currentPath.length > 0) {
         section = currentPath[0];
-      } else if (currentView === 'sponsors') {
-        section = 'sponsors';
       }
       
       // Add to path
@@ -1938,13 +1829,8 @@ God Mode: ON
       try {
         let markdownContent;
         
-        if (section === 'sponsors' && sponsors[filename]) {
-          // Use built-in sponsor content
-          markdownContent = sponsors[filename].content;
-        } else {
-          // Load the actual markdown content from server
-          markdownContent = await loadArticleContent(filename);
-        }
+        // Load the actual markdown content from server
+        markdownContent = await loadArticleContent(filename);
         
         // Create the new content
         const newContent = `
@@ -2091,7 +1977,7 @@ God Mode: ON
       // Autocomplete for 'cd' command at root
       if (parts[0] === 'cd' && currentPath.length === 0) {
         const partial = parts.slice(1).join(' ');
-        const directories = ['articles', 'sponsors'];
+        const directories = ['articles'];
 
         const matches = directories.filter(dir =>
           dir.toLowerCase().startsWith(partial.toLowerCase())
@@ -2175,7 +2061,7 @@ God Mode: ON
 
         if (input) {
           // Show the command that was entered
-          output.textContent += `posixparty@kingsport:~$ ${input}\n`;
+          output.textContent += `posixparty:~$ ${input}\n`;
           output.classList.add('show');
 
           if (commands[command]) {
@@ -2237,7 +2123,7 @@ God Mode: ON
 
       const startPlaying = () => {
         if (!hasPlayed) {
-          marqueeText.textContent = '> Monthly GNU/Linux Meetup @ The Inventor Center, Kingsport, TN - Where POSIX compliance is the life of the party! 🎉';
+          marqueeText.textContent = '> Posix Party - Where POSIX compliance is the life of the party! 🎉';
           hasPlayed = true;
         }
         marqueeText.classList.add('scrolling');
@@ -2302,16 +2188,6 @@ God Mode: ON
           setTimeout(() => {
             if (articles[filename]) {
               showArticle(filename, articles[filename]);
-            }
-            isHandlingHash = false;
-          }, 300);
-        } else if (section === 'sponsors' && filename) {
-          // Navigate to sponsors section first
-          navigate('sponsors');
-          // Then show the specific sponsor
-          setTimeout(() => {
-            if (sponsors[filename]) {
-              showArticle(filename, sponsors[filename]);
             }
             isHandlingHash = false;
           }, 300);
