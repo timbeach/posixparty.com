@@ -1269,6 +1269,99 @@
       box-shadow: 0 0 20px rgba(255, 60, 172, 0.4);
       display: block;
     }
+    .article-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+    .article-content th,
+    .article-content td {
+      border: 1px solid var(--highlight);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    .article-content th {
+      background: rgba(255, 215, 0, 0.1);
+      color: var(--highlight);
+      font-weight: 600;
+    }
+    .article-content tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .article-content ul,
+    .article-content ol {
+      margin: 1.25rem 0;
+      padding-left: 1.5rem;
+    }
+    .article-content li {
+      margin: 0.4rem 0;
+      line-height: 1.7;
+    }
+    .article-content ul.task-list {
+      list-style: none;
+      padding-left: 0;
+    }
+    .article-content ul.task-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      margin: 0.6rem 0;
+    }
+    .article-content ul.task-list li .task-checkbox {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.1rem;
+      height: 1.1rem;
+      min-width: 1.1rem;
+      border: 1.5px solid var(--foreground);
+      border-radius: 3px;
+      margin-top: 0.35rem;
+      background: transparent;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .article-content ul.task-list li .task-checkbox:hover {
+      background: rgba(60, 179, 113, 0.15);
+      box-shadow: 0 0 6px rgba(60, 179, 113, 0.3);
+    }
+    .article-content ul.task-list li .task-checkbox.checked {
+      background: rgba(60, 179, 113, 0.15);
+      animation: checkbox-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .article-content ul.task-list li .task-checkbox.checked::after {
+      content: '\2713';
+      color: var(--foreground);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .article-content ul.task-list li.task-done > span:last-child {
+      text-decoration: line-through;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+    @keyframes checkbox-pop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.35); }
+      70% { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+    .task-checkbox.ripple::before {
+      content: '';
+      position: absolute;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: rgba(60, 179, 113, 0.3);
+      animation: checkbox-ripple 0.5s ease-out forwards;
+    }
+    @keyframes checkbox-ripple {
+      0% { transform: scale(0); opacity: 1; }
+      100% { transform: scale(2); opacity: 0; }
+    }
     .back-btn {
       background: transparent;
       border: 1px solid var(--highlight);
@@ -1824,7 +1917,14 @@ God Mode: ON
       }, 100);
       
       isShowingArticle = true;
-      
+
+      // Auto-enable focus mode when viewing articles
+      if (!focusMode) {
+        focusMode = true;
+        localStorage.setItem('focusMode', true);
+        updateFocusMode();
+      }
+
       // Load content with smooth transition
       try {
         let markdownContent;
@@ -1846,8 +1946,17 @@ God Mode: ON
           content.innerHTML = newContent;
           content.classList.remove('fade-out');
           content.classList.add('fade-in');
+          // Make task list checkboxes interactive
+          content.querySelectorAll('.task-checkbox').forEach(cb => {
+            cb.addEventListener('click', () => {
+              cb.classList.toggle('checked');
+              cb.closest('li').classList.toggle('task-done');
+              cb.classList.add('ripple');
+              setTimeout(() => cb.classList.remove('ripple'), 500);
+            });
+          });
         }, 300);
-        
+
       } catch (error) {
         const errorContent = `
           <button class="back-btn" onclick="navigate('${section}')">← back to ${section}/</button>
@@ -1872,11 +1981,11 @@ God Mode: ON
     function parseMarkdown(content) {
       // First handle code blocks to prevent interference with other parsing
       let processedContent = content;
-      
+
       // Temporarily replace code blocks with placeholders to protect them
       const codeBlocks = [];
       let codeBlockIndex = 0;
-      
+
       // Handle code blocks with language specification
       processedContent = processedContent.replace(/```\s*(\w+)?\s*\n?([\s\S]*?)\n?```/g, (match, lang, code) => {
         const placeholder = `__CODE_BLOCK_${codeBlockIndex}__`;
@@ -1884,39 +1993,120 @@ God Mode: ON
         codeBlockIndex++;
         return placeholder;
       });
-      
+
       // Handle inline code
       processedContent = processedContent.replace(/`([^`]+)`/g, '<code>$1</code>');
-      
+
+      // Handle markdown tables — replace with placeholders to protect from <p> wrapping
+      const tablePlaceholders = [];
+      let tableIndex = 0;
+      processedContent = processedContent.replace(
+        /(^\|.+\|$\n^\|[\s\-:|]+\|$\n(?:^\|.+\|$\n?)+)/gm,
+        (tableBlock) => {
+          const rows = tableBlock.trim().split('\n');
+          const headers = rows[0].split('|').filter(c => c.trim()).map(c => c.trim());
+          const bodyRows = rows.slice(2);
+          let html = '<table><thead><tr>';
+          headers.forEach(h => { html += `<th>${h}</th>`; });
+          html += '</tr></thead><tbody>';
+          bodyRows.forEach(row => {
+            const cells = row.split('|').filter(c => c.trim()).map(c => c.trim());
+            html += '<tr>';
+            cells.forEach(c => { html += `<td>${c}</td>`; });
+            html += '</tr>';
+          });
+          html += '</tbody></table>';
+          const placeholder = `__TABLE_BLOCK_${tableIndex}__`;
+          tablePlaceholders.push({ placeholder, html });
+          tableIndex++;
+          return placeholder;
+        }
+      );
+
+      // Handle unordered lists (including task lists) — replace with placeholders
+      const listPlaceholders = [];
+      let listIndex = 0;
+      processedContent = processedContent.replace(
+        /((?:^[-*] (?:\[[ x]\] )?.+$\n?)+)/gm,
+        (listBlock) => {
+          const items = listBlock.trim().split('\n');
+          const hasTaskItems = items.some(item => /^[-*] \[[ x]\] /.test(item));
+          let html;
+          if (hasTaskItems) {
+            html = '<ul class="task-list">';
+            items.forEach(item => {
+              const match = item.match(/^[-*] \[([ x])\] (.+)$/);
+              if (match) {
+                const checked = match[1] === 'x';
+                const text = match[2];
+                html += `<li><span class="task-checkbox${checked ? ' checked' : ''}"></span><span>${text}</span></li>`;
+              } else {
+                const text = item.replace(/^[-*] /, '');
+                html += `<li><span>${text}</span></li>`;
+              }
+            });
+          } else {
+            html = '<ul>';
+            items.forEach(item => {
+              const text = item.replace(/^[-*] /, '');
+              html += `<li>${text}</li>`;
+            });
+          }
+          html += '</ul>';
+          const placeholder = `__LIST_BLOCK_${listIndex}__`;
+          listPlaceholders.push({ placeholder, html });
+          listIndex++;
+          return placeholder;
+        }
+      );
+
+      // Handle ordered lists — replace with placeholders
+      processedContent = processedContent.replace(
+        /((?:^\d+\. .+$\n?)+)/gm,
+        (listBlock) => {
+          const items = listBlock.trim().split('\n');
+          let html = '<ol>';
+          items.forEach(item => {
+            const text = item.replace(/^\d+\. /, '');
+            html += `<li>${text}</li>`;
+          });
+          html += '</ol>';
+          const placeholder = `__LIST_BLOCK_${listIndex}__`;
+          listPlaceholders.push({ placeholder, html });
+          listIndex++;
+          return placeholder;
+        }
+      );
+
       // Handle headers (but not inside code blocks since they're now placeholders)
       processedContent = processedContent
         .replace(/^# (.+)$/gm, '<h2>$1</h2>')
         .replace(/^## (.+)$/gm, '<h3>$1</h3>')
         .replace(/^### (.+)$/gm, '<h4>$1</h4>');
-      
+
       // Handle bold and italic
       processedContent = processedContent
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.+?)\*/g, '<em>$1</em>');
-      
+
       // Handle images (must come before links since ![...] contains [...])
       processedContent = processedContent.replace(/!\[([^\]]*)\]\((.+?)\)/g, '<img src="$2" alt="$1" />');
 
       // Handle links
       processedContent = processedContent.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
-      
+
       // Handle paragraphs (but not inside pre tags)
       processedContent = processedContent
         .replace(/\n\n/g, '</p><p>')
         .replace(/^(.+)$/gm, '<p>$1</p>');
-      
+
       // Clean up
       processedContent = processedContent
         .replace(/<p><h/g, '<h')
         .replace(/<\/h([1-6])><\/p>/g, '</h$1>')
         .replace(/<p><pre>/g, '<pre>')
         .replace(/<\/pre><\/p>/g, '</pre>');
-      
+
       // Restore code blocks
       codeBlocks.forEach(({ placeholder, lang, code }) => {
         // Trim leading/trailing whitespace but preserve internal formatting
@@ -1924,7 +2114,19 @@ God Mode: ON
         const codeElement = lang ? `<pre><code class="language-${lang}">${trimmedCode}</code></pre>` : `<pre><code>${trimmedCode}</code></pre>`;
         processedContent = processedContent.replace(placeholder, codeElement);
       });
-      
+
+      // Restore table blocks
+      tablePlaceholders.forEach(({ placeholder, html }) => {
+        processedContent = processedContent.replace(`<p>${placeholder}</p>`, html);
+        processedContent = processedContent.replace(placeholder, html);
+      });
+
+      // Restore list blocks
+      listPlaceholders.forEach(({ placeholder, html }) => {
+        processedContent = processedContent.replace(`<p>${placeholder}</p>`, html);
+        processedContent = processedContent.replace(placeholder, html);
+      });
+
       return processedContent;
     }
 
