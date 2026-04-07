@@ -267,6 +267,10 @@ header h1 {
   transition: width 0.3s ease;
 }
 
+@media (max-width: 1024px) {
+  #gallery { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 768px) {
   header { padding: 1rem; flex-direction: column; align-items: flex-start; }
   header h1 { font-size: 1.1rem; }
@@ -307,6 +311,12 @@ let photos = [];
 let selected = new Set();
 let currentLightboxIndex = -1;
 
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
 async function init() {
   try {
     const res = await fetch('photos.json');
@@ -326,8 +336,8 @@ function renderGallery() {
   gallery.innerHTML = photos.map((photo, i) => `
     <div class="photo-card${selected.has(i) ? ' selected' : ''}" data-index="${i}">
       <div class="checkbox" onclick="event.stopPropagation(); toggleSelect(${i})"></div>
-      <img src="photos/${photo.file}" alt="${photo.caption || ''}" loading="lazy" onclick="openLightbox(${i})" />
-      ${photo.caption ? `<div class="caption">${photo.caption}</div>` : ''}
+      <img src="photos/${esc(photo.file)}" alt="${esc(photo.caption || '')}" loading="lazy" onclick="openLightbox(${i})" />
+      ${photo.caption ? `<div class="caption">${esc(photo.caption)}</div>` : ''}
     </div>
   `).join('');
 }
@@ -464,7 +474,8 @@ async function downloadSelected() {
   let completed = 0;
 
   for (const photo of selectedPhotos) {
-    progressText.textContent = `Zipping ${completed + 1} of ${selectedPhotos.length}...`;
+    completed++;
+    progressText.textContent = `Zipping ${completed} of ${selectedPhotos.length}...`;
     progressFill.style.width = `${(completed / selectedPhotos.length) * 100}%`;
 
     try {
@@ -474,7 +485,6 @@ async function downloadSelected() {
     } catch (e) {
       console.error(`Failed to fetch ${photo.file}:`, e);
     }
-    completed++;
   }
 
   progressText.textContent = 'Creating zip file...';
