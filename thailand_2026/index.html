@@ -376,6 +376,128 @@ function toggleSelectAll() {
 }
 
 init();
+
+function openLightbox(index) {
+  currentLightboxIndex = index;
+  const photo = photos[index];
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lb-img');
+  const caption = document.getElementById('lb-caption');
+
+  img.src = `photos/${photo.file}`;
+  img.alt = photo.caption || '';
+  caption.textContent = photo.caption || '';
+  lb.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.add('hidden');
+  document.body.style.overflow = '';
+  currentLightboxIndex = -1;
+}
+
+function navLightbox(direction) {
+  if (photos.length === 0) return;
+  currentLightboxIndex = (currentLightboxIndex + direction + photos.length) % photos.length;
+  const photo = photos[currentLightboxIndex];
+  document.getElementById('lb-img').src = `photos/${photo.file}`;
+  document.getElementById('lb-img').alt = photo.caption || '';
+  document.getElementById('lb-caption').textContent = photo.caption || '';
+}
+
+function downloadCurrent() {
+  if (currentLightboxIndex < 0) return;
+  const photo = photos[currentLightboxIndex];
+  const a = document.createElement('a');
+  a.href = `photos/${photo.file}`;
+  a.download = photo.file;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('lightbox').classList.contains('hidden')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') navLightbox(-1);
+  if (e.key === 'ArrowRight') navLightbox(1);
+});
+
+// Close lightbox on backdrop click
+document.getElementById('lightbox').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('lightbox')) closeLightbox();
+});
+
+// Touch swipe support for lightbox
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.getElementById('lightbox').addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
+
+document.getElementById('lightbox').addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  const diff = touchStartX - touchEndX;
+  if (Math.abs(diff) > 50) {
+    navLightbox(diff > 0 ? 1 : -1);
+  }
+});
+
+async function downloadSelected() {
+  if (selected.size === 0) return;
+
+  if (typeof JSZip === 'undefined') {
+    alert('Zip library not loaded. Please try again or download photos individually from the lightbox.');
+    return;
+  }
+
+  const progress = document.getElementById('zip-progress');
+  const progressText = document.getElementById('zip-progress-text');
+  const progressFill = document.getElementById('zip-progress-fill');
+  progress.classList.remove('hidden');
+
+  const zip = new JSZip();
+  const selectedPhotos = [...selected].map(i => photos[i]);
+  let completed = 0;
+
+  for (const photo of selectedPhotos) {
+    progressText.textContent = `Zipping ${completed + 1} of ${selectedPhotos.length}...`;
+    progressFill.style.width = `${(completed / selectedPhotos.length) * 100}%`;
+
+    try {
+      const response = await fetch(`photos/${photo.file}`);
+      const blob = await response.blob();
+      zip.file(photo.file, blob);
+    } catch (e) {
+      console.error(`Failed to fetch ${photo.file}:`, e);
+    }
+    completed++;
+  }
+
+  progressText.textContent = 'Creating zip file...';
+  progressFill.style.width = '100%';
+
+  try {
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'thailand_2026_photos.zip';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Failed to create zip file. Try downloading photos individually.');
+    console.error(e);
+  }
+
+  progress.classList.add('hidden');
+  progressFill.style.width = '0%';
+}
   </script>
 </body>
 </html>
