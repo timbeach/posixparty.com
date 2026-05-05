@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>LHFAM Progress · 2026-05-05</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0e0a;
+      --fg: #3CB371;
+      --hl: #FFD700;
+      --dim: rgba(60, 179, 113, 0.5);
+      --border: rgba(60, 179, 113, 0.2);
+      --warn: #ff9966;
+      --ok: #6fdc8c;
+      --bad: #ff5e5e;
+    }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    /* Password gate overlay */
+    #gate {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 1.5rem;
+      padding: 2rem;
+    }
+    #gate h2 { color: var(--hl); font-size: 1.4rem; font-weight: 400; }
+    #gate p { color: var(--dim); font-size: 0.95rem; max-width: 30rem; text-align: center; }
+    #gate input {
+      background: transparent;
+      border: 1px solid var(--fg);
+      color: var(--fg);
+      font-family: inherit;
+      font-size: 1.1rem;
+      padding: 0.7rem 1rem;
+      border-radius: 3px;
+      min-width: 18rem;
+      text-align: center;
+    }
+    #gate input:focus { outline: none; border-color: var(--hl); box-shadow: 0 0 8px rgba(255,215,0,0.4); }
+    #gate .err { color: var(--bad); font-size: 0.85rem; min-height: 1em; }
+    #gate .hint { color: var(--dim); font-size: 0.8rem; }
+
+    body.locked { overflow: hidden; }
+    body:not(.unlocked) main { display: none; }
+
+    header {
+      padding: 2rem 2rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header .crumb { color: var(--dim); font-size: 0.85rem; margin-bottom: 0.4rem; }
+    header h1 {
+      color: var(--hl);
+      font-size: 1.6rem;
+      font-weight: 400;
+      margin-bottom: 0.4rem;
+    }
+    header .sub { color: var(--fg); font-size: 0.95rem; opacity: 0.8; }
+    header .meta {
+      margin-top: 0.8rem;
+      font-size: 0.78rem;
+      color: var(--dim);
+    }
+    main { padding: 1rem 2rem 4rem; max-width: 1400px; margin: 0 auto; }
+
+    /* Section blocks */
+    section { margin-top: 2.5rem; }
+    section h2 {
+      color: var(--hl);
+      font-size: 1.2rem;
+      font-weight: 400;
+      margin-bottom: 0.6rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    section h3 {
+      color: var(--fg);
+      font-size: 1.0rem;
+      font-weight: 400;
+      margin: 1.2rem 0 0.5rem;
+    }
+    section p { margin-bottom: 0.8rem; max-width: 64rem; }
+    section .lede {
+      color: var(--hl);
+      opacity: 0.9;
+      font-size: 1.0rem;
+      margin-bottom: 1rem;
+      max-width: 64rem;
+    }
+    section ul, section ol { margin: 0.4rem 0 0.8rem 1.4rem; }
+    section li { margin-bottom: 0.3rem; }
+    section .callout {
+      border-left: 2px solid var(--hl);
+      padding: 0.6rem 1rem;
+      background: rgba(255,215,0,0.06);
+      margin: 1rem 0;
+      max-width: 64rem;
+    }
+    section .callout.warn { border-color: var(--warn); background: rgba(255,153,102,0.08); }
+    section .callout.bad { border-color: var(--bad); background: rgba(255,94,94,0.08); }
+    section .callout.ok { border-color: var(--ok); background: rgba(111,220,140,0.08); }
+
+    /* Stack overview */
+    .stack-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.6rem; margin: 0.8rem 0 1.5rem;
+    }
+    .stack-card {
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.7rem 0.9rem;
+    }
+    .stack-card .row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; }
+    .stack-card .label { color: var(--dim); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .stack-card .name { color: var(--hl); font-size: 0.95rem; }
+    .stack-card .desc { color: var(--fg); opacity: 0.75; font-size: 0.8rem; }
+    .stack-card.ok { border-color: rgba(111,220,140,0.4); }
+    .stack-card.partial { border-color: rgba(255,215,0,0.3); }
+    .badge { display: inline-block; padding: 0.05rem 0.4rem; border-radius: 2px; font-size: 0.7rem; }
+    .badge.ok { background: rgba(111,220,140,0.15); color: var(--ok); }
+    .badge.partial { background: rgba(255,215,0,0.15); color: var(--hl); }
+    .badge.todo { background: rgba(255,153,102,0.15); color: var(--warn); }
+
+    /* Image grid */
+    .grid {
+      display: grid; gap: 0.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+    .grid.tight { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .grid.wide { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .card:hover { border-color: var(--fg); box-shadow: 0 0 8px rgba(60,179,113,0.2); }
+    .card img { display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; }
+    .card .cap { padding: 0.3rem 0.5rem; font-size: 0.72rem; color: var(--dim); }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin: 0.5rem 0 0.9rem; }
+    .tab {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      color: var(--dim);
+      border-bottom: 2px solid transparent;
+      font-family: inherit;
+      font-size: 0.85rem;
+      background: transparent;
+      border-top: none; border-left: none; border-right: none;
+    }
+    .tab.active { color: var(--hl); border-bottom-color: var(--hl); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Audio rows */
+    .aud-row {
+      display: grid;
+      grid-template-columns: minmax(0,1fr) minmax(0,2fr);
+      gap: 0.8rem;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .aud-row .lbl { font-size: 0.85rem; }
+    .aud-row .lbl strong { color: var(--hl); }
+    .aud-row audio { width: 100%; height: 32px; }
+
+    /* Video grid */
+    .vid-grid {
+      display: grid; gap: 0.8rem;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+    .vid-grid video { width: 100%; border: 1px solid var(--border); background: #000; border-radius: 3px; }
+    .vid-grid .vcap { font-size: 0.78rem; color: var(--dim); margin-top: 0.3rem; }
+    .vid-grid .vcap strong { color: var(--hl); }
+
+    /* Lightbox */
+    #lb { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: none; z-index: 100; align-items: center; justify-content: center; cursor: zoom-out; padding: 2rem; }
+    #lb.open { display: flex; }
+    #lb img { max-width: 95%; max-height: 95vh; object-fit: contain; border: 1px solid var(--fg); border-radius: 3px; }
+    #lb .lb-cap { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); color: var(--hl); font-size: 0.85rem; }
+
+    code, .mono { font-family: inherit; color: var(--hl); background: rgba(255,215,0,0.08); padding: 0.05rem 0.35rem; border-radius: 2px; font-size: 0.85em; }
+    a { color: var(--hl); text-decoration: underline; text-decoration-color: rgba(255,215,0,0.3); }
+    a:hover { text-decoration-color: var(--hl); }
+    table { border-collapse: collapse; margin: 0.5rem 0; font-size: 0.85rem; }
+    th, td { border: 1px solid var(--border); padding: 0.35rem 0.6rem; text-align: left; }
+    th { color: var(--hl); font-weight: 400; background: rgba(60,179,113,0.05); }
+
+    .footer-cmd { color: var(--dim); font-size: 0.78rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .footer-cmd .pp { color: var(--fg); }
+    .footer-cmd .blink { animation: blink 1s steps(2,end) infinite; }
+    @keyframes blink { 0%,49% {opacity:1;} 50%,100% {opacity:0;} }
+
+    /* Decision list */
+    .decisions { display: grid; gap: 0.8rem; max-width: 64rem; }
+    .decision {
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.8rem 1rem;
+    }
+    .decision .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.3rem; }
+    .decision .id { color: var(--dim); font-size: 0.78rem; }
+    .decision .q { color: var(--hl); font-size: 0.95rem; }
+    .decision .body { font-size: 0.88rem; opacity: 0.9; }
+  </style>
+</head>
+<body class="locked">
+
+<!-- Password gate -->
+<div id="gate">
+  <h2>$ ssh lhfam@progress-2026-05-05</h2>
+  <p>Internal-only progress review for the LHFAM team. Not indexed, not crawled.</p>
+  <input type="password" id="pwd" autocomplete="off" autofocus placeholder="passphrase" />
+  <div class="err" id="gerr"></div>
+  <div class="hint">team passphrase &mdash; ask Timothy</div>
+</div>
+
+<main>
+  <header>
+    <div class="crumb">posixparty.com / lhfam_2026-05-05</div>
+    <h1>LHFAM &mdash; AI Reaction Channel Progress</h1>
+    <div class="sub">2026-05-05 &middot; end-of-day review &middot; for team eyes only</div>
+    <div class="meta">3 days of work compacted. Pod paused. Repo pushed to <span class="mono">development-timothy</span>.</div>
+  </header>
+
+  <section>
+    <h2>where we are</h2>
+    <p class="lede">The full pipeline (text → AI voice → AI character → talking-head video → spliced reaction clip) is working end-to-end on open-source models running on a single 24GB cloud GPU. Quality bar today is "shippable for casual reaction content" with two known limitations on character expression range to optimise next.</p>
+
+    <div class="stack-grid">
+      <div class="stack-card ok">
+        <div class="row"><span class="label">voice</span> <span class="badge ok">winner</span></div>
+        <div class="name">Chatterbox Turbo</div>
+        <div class="desc">350M, MIT, 1-step, paralinguistic tags <span class="mono">[laugh][gasp][sigh]</span> performed in cloned Mason voice</div>
+      </div>
+      <div class="stack-card partial">
+        <div class="row"><span class="label">character</span> <span class="badge partial">2 bibles</span></div>
+        <div class="name">PuLID + FLUX.1-dev</div>
+        <div class="desc">12-image bibles, identity-locked, photoreal. Synthetic still narrow on expression range.</div>
+      </div>
+      <div class="stack-card ok">
+        <div class="row"><span class="label">animation</span> <span class="badge ok">working</span></div>
+        <div class="name">EchoMimic V3 Flash</div>
+        <div class="desc">Audio-driven talking head, 8-step Flow_Unipc. ~28s for 3.24s of video at 768&times;768.</div>
+      </div>
+      <div class="stack-card ok">
+        <div class="row"><span class="label">splicing</span> <span class="badge ok">working</span></div>
+        <div class="name">ffmpeg PiP</div>
+        <div class="desc">28% scale, bottom-right, source audio at 0.55 vol mixed with reaction audio.</div>
+      </div>
+      <div class="stack-card partial">
+        <div class="row"><span class="label">orchestration</span> <span class="badge todo">manual</span></div>
+        <div class="name">CLI scripts</div>
+        <div class="desc">Each stage is its own Python script. No queue/UI yet. ~5 scripts; reusable via <span class="mono">--engine</span> / <span class="mono">--mode</span> flags.</div>
+      </div>
+      <div class="stack-card ok">
+        <div class="row"><span class="label">infra</span> <span class="badge ok">stable</span></div>
+        <div class="name">RunPod 4090 24GB</div>
+        <div class="desc">80G volume + 80G container. ~$0.70/hr. Models cached on volume → survive migrations.</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Today (May 4-5):</strong> Locked Chatterbox Turbo as the default voice (won blind A/B "by a mile"). Then ran a tier ladder for character generation: <span class="mono">SDXL+InstantID</span> → unusable (Getty watermarks, waxy faces) → switched to <span class="mono">FLUX.1-dev + PuLID</span> (no skimping on quality per Tim's call). Generated two character bibles. Validated end-to-end pipeline. Cost so far across all 3 days: ~$15.
+    </div>
+  </section>
+
+  <section>
+    <h2>1. voice — chatterbox turbo</h2>
+    <p class="lede">All audio in this section is generated from text by Chatterbox Turbo using Mason's 20-second reference clip as the cloning source. Each line is a real reaction we're going to use against actual source clips.</p>
+
+    <h3>mason reference (the input we cloned)</h3>
+    <div class="aud-row">
+      <div class="lbl"><strong>mason_reference_20s.wav</strong><br><span style="color:var(--dim);font-size:0.78rem">20s · the source voice</span></div>
+      <audio controls preload="metadata" src="aud/turbo/00_mason_reference.wav"></audio>
+    </div>
+
+    <h3>turbo-cloned reaction lines</h3>
+    <p style="color:var(--dim);font-size:0.85rem">All produced from text; no editing. The <span class="mono">[chuckle]</span>/<span class="mono">[gasp]</span>/<span class="mono">[groan]</span> non-verbals were performed by Turbo in Mason's voice from inline tags in the prompt &mdash; we did not splice in real samples.</p>
+    <div class="aud-row">
+      <div class="lbl"><strong>amused</strong> · "[chuckle] bro just proposed and then LEFT? where are you going my guy?"</div>
+      <audio controls preload="none" src="aud/turbo/01_amused_proposed_left.wav"></audio>
+    </div>
+    <div class="aud-row">
+      <div class="lbl"><strong>hype</strong> · "[gasp] YO. The street just exploded. How did nobody get hurt from that?"</div>
+      <audio controls preload="none" src="aud/turbo/02_hype_street_exploded.wav"></audio>
+    </div>
+    <div class="aud-row">
+      <div class="lbl"><strong>deadpan</strong> · "Yep. There it is. Brother why are you golfing next to your car?"</div>
+      <audio controls preload="none" src="aud/turbo/03_deadpan_golfing.wav"></audio>
+    </div>
+    <div class="aud-row">
+      <div class="lbl"><strong>speechless</strong> · "[gasp] No. No no no no no."</div>
+      <audio controls preload="none" src="aud/turbo/04_speechless_no_no.wav"></audio>
+    </div>
+    <div class="aud-row">
+      <div class="lbl"><strong>cringe</strong> · "[groan] Oh no no no no no"</div>
+      <audio controls preload="none" src="aud/turbo/05_cringe_oh_no.wav"></audio>
+    </div>
+    <div class="aud-row">
+      <div class="lbl"><strong>wholesome</strong> · "and they held it up like Simba. come on"</div>
+      <audio controls preload="none" src="aud/turbo/06_wholesome_simba.wav"></audio>
+    </div>
+
+    <p style="margin-top: 0.8rem; font-size:0.85rem">81 lines like these were generated total (one per reaction across 50 source clips). Listen for: natural prosody, the non-verbal tags performed in-voice (not spliced), preservation of Mason's vocal character.</p>
+  </section>
+
+  <section>
+    <h2>2. character bible &mdash; mason</h2>
+    <p class="lede">A "character bible" is a 12-image library of the same identity in 4 expressions × 3 framings. Generated from <span class="mono">mason_goth.jpeg</span> as the PuLID-FLUX identity reference. We pick the right shot per reaction beat.</p>
+
+    <h3>reference (input)</h3>
+    <div class="grid tight" style="grid-template-columns: 200px;">
+      <div class="card"><img loading="lazy" src="img/mason_flux/_keyframe.jpg" alt="Mason reference"><div class="cap">mason_goth.jpeg (PuLID id ref)</div></div>
+    </div>
+
+    <h3>bible (12 generated images, click to enlarge)</h3>
+    <div class="grid" id="grid-mason-flux"></div>
+
+    <div class="callout ok"><strong>Wins:</strong> No watermarks, real skin texture (visible pores), hair/lipstick locked across all 12, eyes look alive, candid-amateur photo aesthetic.<br>
+    <strong>Notes:</strong> "Surprised" came out more concerned than open-mouth surprise, "halfbody" framing got loose interpretation. Both fixable with prompt tightening if we want, but characters are usable as-is.</div>
+  </section>
+
+  <section>
+    <h2>3. character bible &mdash; synthetic (fully AI-invented)</h2>
+    <p class="lede">No source photo. Generated a base keyframe from text, then used that keyframe as PuLID's identity reference for the bible. Goal: an arbitrary AI character we can swap voices/wardrobes on without needing a real-person photo.</p>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="v2">v2 (current — neutral keyframe + id_weight 0.6)</button>
+      <button class="tab" data-tab="v1">v1 (initial — smile-locked)</button>
+    </div>
+
+    <div class="tab-panel active" data-panel="v2">
+      <h3>v2 reference (text-only generated keyframe)</h3>
+      <div class="grid tight" style="grid-template-columns: 200px;">
+        <div class="card"><img loading="lazy" src="img/synth_flux_v2/_keyframe.jpg" alt="v2 keyframe"><div class="cap">v2 keyframe (FLUX-dev txt2img)</div></div>
+      </div>
+      <h3>v2 bible</h3>
+      <div class="grid" id="grid-synth-v2"></div>
+      <div class="callout warn"><strong>Wins vs v1:</strong> Identity even more locked, less painterly skin, "laughing" actually shows teeth + mouth open (real expression difference).<br>
+      <strong>Open issue:</strong> "Neutral", "surprised", "deadpan" all still trend toward subtle pleasant smile — FLUX-dev has a strong bias toward pleasant subjects that survives even <span class="mono">id_weight=0.6</span>. The character is usable for friendly content but emotional range is narrower than the Mason bible.</div>
+    </div>
+
+    <div class="tab-panel" data-panel="v1">
+      <h3>v1 reference</h3>
+      <div class="grid tight" style="grid-template-columns: 200px;">
+        <div class="card"><img loading="lazy" src="img/synth_flux_v1/_keyframe.jpg" alt="v1 keyframe"><div class="cap">v1 keyframe (had a smile in prompt)</div></div>
+      </div>
+      <h3>v1 bible (smile-locked)</h3>
+      <div class="grid" id="grid-synth-v1"></div>
+      <div class="callout bad"><strong>Why we iterated:</strong> Every variant looked nearly identical &mdash; PuLID over-locked on the keyframe's smile because <span class="mono">id_weight=0.85</span> was too high and the keyframe prompt explicitly said "soft natural smile". v2 fixed both knobs.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. what we rejected &mdash; SDXL + InstantID (Tier 1)</h2>
+    <p class="lede">Yesterday's first attempt before switching to FLUX. Same 12-image matrix, identity-preserving via InstantID. Disqualified for two reasons.</p>
+
+    <div class="grid wide" id="grid-mason-sdxl"></div>
+
+    <div class="callout bad"><strong>Disqualified for:</strong>
+      <ol>
+        <li><strong>Getty Images watermarks</strong> bleeding through on multiple images (SDXL training-data leak — see laughing/surprised shots).</li>
+        <li><strong>Waxy/plastic skin</strong> on expressive shots — uncanny-valley territory; not "real human" enough.</li>
+        <li>Identity drift: keyframe had long blonde hair with bangs, bible drifted to pixie cut on most images.</li>
+      </ol>
+      Switching to FLUX-dev cost ~$3 of compute (model downloads + iterations) but eliminated all three issues.
+    </div>
+  </section>
+
+  <section>
+    <h2>5. end-to-end pipeline validation</h2>
+    <p class="lede">Bible image (still) + Mason Turbo audio → EchoMimic V3 → talking-head MP4 with lip-sync. This is the core loop the whole project rests on. Both characters tested with the same audio (the "amused" line) for direct comparison.</p>
+
+    <div class="vid-grid">
+      <div>
+        <video controls preload="metadata" src="vid/validation/mason_flux_laughing.mp4"></video>
+        <div class="vcap"><strong>Mason character</strong> (FLUX bible · laughing portrait) + Turbo audio</div>
+      </div>
+      <div>
+        <video controls preload="metadata" src="vid/validation/synth_flux_laughing.mp4"></video>
+        <div class="vcap"><strong>Synthetic character</strong> (FLUX v2 bible · laughing portrait) + same Turbo audio</div>
+      </div>
+    </div>
+
+    <div class="callout"><strong>What to listen + watch for:</strong> mouth shapes match phonemes ("g", "K", "you have G[OT] to..."), eye contact, subtle head movement driven by audio energy. Mason's lipstick and hair stay locked from the bible image. Synthetic character's freckles and auburn hair stay locked. Same identity throughout each clip — no drift across the 3.24 seconds.</div>
+  </section>
+
+  <section>
+    <h2>6. PiP demos (yesterday's batch using Mason headshot directly)</h2>
+    <p class="lede">8 reaction clips spliced into source videos in the SniperWolf PiP format. These were made BEFORE we had the FLUX bibles (the talking head is just <span class="mono">mason_goth.jpeg</span> animated by EchoMimic on each audio). Useful to feel the format; the next batch will use the bible images for more shot variety.</p>
+
+    <div class="vid-grid" id="grid-spliced"></div>
+
+    <div class="callout"><strong>Spec:</strong> talking head appears at the reaction timestamp from the JSON (<span class="mono">"timestamp": "0:06"</span>), bottom-right corner, 28% scale. Source audio dropped to 55% volume; reaction audio mixed in at full volume. ffmpeg overlay+amix in one pass.</div>
+  </section>
+
+  <section>
+    <h2>7. open decisions for the team</h2>
+    <p class="lede">Things that need a call before we scale up to producing real content.</p>
+
+    <div class="decisions">
+      <div class="decision">
+        <div class="head"><span class="q">D1 — Synthetic character: ship as-is or iterate further?</span><span class="id">Q1</span></div>
+        <div class="body">v2 has narrow expression range outside of "laughing". Options: (a) ship and live with 80% of shots being slight-smile; (b) one more iteration with id_weight 0.4 + aggressive negatives; (c) build keyframe from a real stoic photo as PuLID reference. Cost per iteration: ~$1.50 + 90 min.</div>
+      </div>
+      <div class="decision">
+        <div class="head"><span class="q">D2 — Voice strategy: only Mason, or build a small voice pool?</span><span class="id">Q2</span></div>
+        <div class="body">Today everything uses Mason's clone. For multi-character content we'd want 2-4 voices. Each clone needs a 20s reference clip. Cost per new voice: trivial (no GPU, just record + commit ref).</div>
+      </div>
+      <div class="decision">
+        <div class="head"><span class="q">D3 — Aesthetic direction beyond "candid amateur photo"?</span><span class="id">Q3</span></div>
+        <div class="body">Current FLUX bibles look like real iPhone photos in real environments. Alternatives we deliberately ruled out today: editorial/studio (too polished, was the SDXL failure mode), VTuber/anime (Tim said no), polished influencer (would need different prompts + LoRA). Want to keep "candid amateur" or pivot?</div>
+      </div>
+      <div class="decision">
+        <div class="head"><span class="q">D4 — Quality ceiling: stay on 4090 or graduate to H100 for Wan2.2?</span><span class="id">Q4</span></div>
+        <div class="body">EchoMimic V3 Flash on 4090 is "good enough talking head". The May 2026 visual research flagged Wan2.2-S2V-14B and Wan2.2-Animate-14B as a quality tier above (full-body animation, relighting, character replacement on existing video). Both need H100 (~$2/hr). One-day spike to evaluate vs the current EchoMimic baseline = ~$16 + a half day of work. Not urgent but worth ranking.</div>
+      </div>
+      <div class="decision">
+        <div class="head"><span class="q">D5 — How many bibles + reactions before launch?</span><span class="id">Q5</span></div>
+        <div class="body">Pilot scale-out: pick 5 source clips, generate full reactions for each (line + audio + animated talking head + PiP composite) using the Mason bible. At current per-image cost ~7min FLUX + ~30s EchoMimic + audio (free), batch of 5 reactions ≈ 1 hour pod time + manual selection of bible shots. Could do 50/day if we automate pose-selection.</div>
+      </div>
+      <div class="decision">
+        <div class="head"><span class="q">D6 — Public-facing brand vs. behind-the-scenes content split</span><span class="id">Q6</span></div>
+        <div class="body">Memory says "keep LHFAM secret, BTS content on IG/TikTok/Shorts to build AI expert presence". Confirm split: production reaction channel uses synthetic character as public face; we publish BTS process content separately under our real names?</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>8. cost &amp; infrastructure</h2>
+
+    <table>
+      <thead><tr><th>day</th><th>focus</th><th>pod hours</th><th>cost</th></tr></thead>
+      <tbody>
+        <tr><td>May 3</td><td>Voice research + Chatterbox Turbo bake-off</td><td>~3hr @ $0.70</td><td>~$2.10</td></tr>
+        <tr><td>May 4</td><td>Turbo bulk gen (81 lines) + 8 EchoMimic talking heads + 8 PiP demos + AI character plan</td><td>~6hr @ $0.70</td><td>~$4.20</td></tr>
+        <tr><td>May 5</td><td>SDXL → FLUX upgrade + 2 character bibles + Phase A validation + Phase B refinement</td><td>~12hr @ $0.70</td><td>~$8.40</td></tr>
+        <tr><td colspan="3"><strong>total active GPU time to date</strong></td><td><strong>~$14.70</strong></td></tr>
+        <tr><td>parked</td><td>Pod stopped (volume + container disks preserved, no GPU)</td><td>$0.02/hr</td><td>~$0.50/day idle</td></tr>
+      </tbody>
+    </table>
+
+    <h3>persistent assets (survive pod migrations)</h3>
+    <ul>
+      <li><span class="mono">/workspace/echomimic_v3</span> — 24GB EchoMimic V3 Flash models</li>
+      <li><span class="mono">/workspace/hf_cache</span> — 33GB FLUX-dev + PuLID weights</li>
+      <li><span class="mono">/workspace/PuLID</span> — pipeline code</li>
+      <li><span class="mono">/workspace/venv-chatterbox</span> — 12GB TTS venv</li>
+      <li><span class="mono">/workspace/venv-kokoro</span> — 4GB fallback TTS venv</li>
+      <li><span class="mono">/workspace/LHFAM</span> — rsynced repo + voice references + reaction JSONs</li>
+    </ul>
+    <p>Volume disk: 80GB / ~73GB used (7GB headroom). Bumping to 150GB would give comfortable room for adding Wan2.2 models if/when D4 goes that way.</p>
+
+    <h3>repo</h3>
+    <p>Branch: <span class="mono">development-timothy</span>. All scripts pushed. All docs at <span class="mono">docs/</span>:</p>
+    <ul>
+      <li><span class="mono">research-voice-models-2026-05-04.md</span> — full voice research</li>
+      <li><span class="mono">research-visual-models-2026-05-04.md</span> — full visual research</li>
+      <li><span class="mono">2026-05-04-ai-character-plan.md</span> — three-tier character build plan</li>
+      <li><span class="mono">2026-05-04-autonomous-session.md</span> — live log of the multi-day work</li>
+      <li><span class="mono">echomimic-v3-setup.md</span> — proven setup recipe</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>9. for the meeting</h2>
+    <p class="lede">Suggested agenda for the team review (15-30 min):</p>
+    <ol>
+      <li>Watch the 2 validation videos in §5 (60s)</li>
+      <li>Browse the 8 PiP demos in §6 (~5 min, you'll skim)</li>
+      <li>Listen to a couple of Turbo audio samples in §1 (~2 min)</li>
+      <li>Eyeball the Mason bible (§2) and synthetic v2 bible (§3 v2 tab)</li>
+      <li>Walk through D1-D6 — pick which calls we make tonight vs defer</li>
+      <li>Agree on the next 2-3 day plan (likely: scale-out pilot of 5 full reactions on Mason bible, parallel investigation of one of D1/D4)</li>
+    </ol>
+  </section>
+
+  <div class="footer-cmd">
+    <span class="pp">posixparty@kingsport:~/lhfam_2026-05-05$</span> _<span class="blink">|</span><br>
+    pod paused at $(date) &middot; resume by restarting the same pod &middot; volume disk preserves all model weights
+  </div>
+</main>
+
+<!-- Lightbox -->
+<div id="lb"><img id="lbimg" alt=""><div class="lb-cap" id="lbcap"></div></div>
+
+<script>
+  // Password gate
+  const PWD = 'havechickenwithjello';
+  const gate = document.getElementById('gate');
+  const pwd = document.getElementById('pwd');
+  const gerr = document.getElementById('gerr');
+  function tryUnlock(p) {
+    if (p === PWD || sessionStorage.getItem('lhfam_unlocked') === '1') {
+      sessionStorage.setItem('lhfam_unlocked', '1');
+      gate.style.display = 'none';
+      document.body.classList.remove('locked');
+      document.body.classList.add('unlocked');
+    } else {
+      gerr.textContent = '✗ wrong passphrase';
+      pwd.value = '';
+      pwd.focus();
+    }
+  }
+  if (sessionStorage.getItem('lhfam_unlocked') === '1') tryUnlock(PWD);
+  pwd.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') tryUnlock(pwd.value);
+  });
+
+  // Bible image lists
+  const expr = ['neutral','neutral','neutral','surprised','surprised','surprised','laughing','laughing','laughing','deadpan','deadpan','deadpan'];
+  const fram = ['portrait','shoulders','halfbody','portrait','shoulders','halfbody','portrait','shoulders','halfbody','portrait','shoulders','halfbody'];
+  function buildGrid(elId, dir) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    let html = '';
+    for (let i=0; i<12; i++) {
+      const n = String(i).padStart(2,'0');
+      const f = `${n}_${expr[i]}_${fram[i]}.jpg`;
+      html += `<div class="card" data-src="${dir}/${f}" data-cap="${expr[i]} × ${fram[i]}"><img loading="lazy" src="${dir}/${f}" alt="${expr[i]} ${fram[i]}"><div class="cap">${expr[i]} × ${fram[i]}</div></div>`;
+    }
+    el.innerHTML = html;
+  }
+  buildGrid('grid-mason-flux', 'img/mason_flux');
+  buildGrid('grid-synth-v2', 'img/synth_flux_v2');
+  buildGrid('grid-synth-v1', 'img/synth_flux_v1');
+  buildGrid('grid-mason-sdxl', 'img/mason_sdxl');
+
+  // Spliced video grid
+  const splicedFiles = [
+    ['clip_0055_r00_impressed_pip.mp4', 'clip_0055 · impressed', '"He just pressed him overhead like it was nothing..."'],
+    ['clip_0097_r01_confused_pip.mp4',  'clip_0097 · confused',  '"WAIT WHAT"'],
+    ['clip_0097_r02_amused_pip.mp4',    'clip_0097 · amused',    '"bro just proposed and then LEFT?"'],
+    ['clip_0098_r01_hype_pip.mp4',      'clip_0098 · hype',      '"YO. The street just exploded."'],
+    ['clip_0133_r00_cringe_pip.mp4',    'clip_0133 · cringe',    '"Oh no no no no no"'],
+    ['clip_0200_r00_speechless_pip.mp4','clip_0200 · speechless','"No. No no no no no."'],
+    ['clip_0252_r01_deadpan_pip.mp4',   'clip_0252 · deadpan',   '"Yep. There it is..."'],
+    ['clip_0375_r01_wholesome_pip.mp4', 'clip_0375 · wholesome', '"and they held it up like Simba. come on"'],
+  ];
+  const splicedEl = document.getElementById('grid-spliced');
+  if (splicedEl) {
+    splicedEl.innerHTML = splicedFiles.map(([f, label, line]) =>
+      `<div><video controls preload="none" src="vid/spliced/${f}"></video><div class="vcap"><strong>${label}</strong> · ${line}</div></div>`
+    ).join('');
+  }
+
+  // Lightbox
+  const lb = document.getElementById('lb');
+  const lbimg = document.getElementById('lbimg');
+  const lbcap = document.getElementById('lbcap');
+  document.addEventListener('click', (e) => {
+    const card = e.target.closest('.card');
+    if (card && card.dataset.src) {
+      lbimg.src = card.dataset.src;
+      lbcap.textContent = card.dataset.cap || '';
+      lb.classList.add('open');
+    } else if (e.target === lb || e.target === lbimg) {
+      lb.classList.remove('open');
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') lb.classList.remove('open');
+  });
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabName = btn.dataset.tab;
+      const parent = btn.closest('section');
+      parent.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b === btn));
+      parent.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === tabName));
+    });
+  });
+</script>
+
+</body>
+</html>
