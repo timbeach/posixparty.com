@@ -240,7 +240,7 @@
 
   <section>
     <h2>where we are</h2>
-    <p class="lede">The full pipeline (text → AI voice → AI character → talking-head video → spliced reaction clip) is working end-to-end on open-source models running on a single 24GB cloud GPU. Quality bar today is "shippable for casual reaction content" with two known limitations on character expression range to optimise next.</p>
+    <p class="lede">The full pipeline (text → AI voice → AI character → talking-head video → spliced reaction clip) is working end-to-end on open-source models running on a single 24GB cloud GPU. <strong>This is a pipeline proof-of-concept, not shippable content.</strong> What's in §5 and §6 below is the cheapest possible end-to-end demonstration — a floating talking-head bust against whatever background the bible image happened to have. To get to shippable we still need the character composited into a believable creator-setup environment (at a desk, in a real-looking room, ideally with the source clip on a screen they're reacting to), tighter animation framing, expression-range fixes (§7 D1), and better motion/body language. <strong>Voice is the only piece that's actually at shipping quality today.</strong></p>
 
     <div class="stack-grid">
       <div class="stack-card ok">
@@ -385,7 +385,7 @@
 
   <section>
     <h2>5. end-to-end pipeline validation</h2>
-    <p class="lede">Bible image (still) + Mason Turbo audio → EchoMimic V3 → talking-head MP4 with lip-sync. This is the core loop the whole project rests on. Both characters tested with the same audio (the "amused" line) for direct comparison.</p>
+    <p class="lede">Bible image (still) + Mason Turbo audio → EchoMimic V3 → talking-head MP4 with lip-sync. This is the core loop the whole project rests on. Both characters tested with the same audio (the "amused" line) for direct comparison. <strong>What you're about to see is a bust against the bible image's original background — not a creator at a desk in a room.</strong> Treat it as proof the pipe works, not as a sample of final output.</p>
 
     <div class="vid-grid">
       <div>
@@ -398,12 +398,13 @@
       </div>
     </div>
 
-    <div class="callout"><strong>What to listen + watch for:</strong> mouth shapes match phonemes ("g", "K", "you have G[OT] to..."), eye contact, subtle head movement driven by audio energy. Mason's lipstick and hair stay locked from the bible image. Synthetic character's freckles and auburn hair stay locked. Same identity throughout each clip — no drift across the 3.24 seconds.</div>
+    <div class="callout"><strong>What to listen + watch for (POC signal):</strong> mouth shapes match phonemes ("g", "K", "you have G[OT] to..."), eye contact, subtle head movement driven by audio energy. Identity stays locked from the bible image — no drift across the 3.24 seconds.<br><br>
+    <strong>What's clearly NOT shippable yet:</strong> floating-bust framing with no body / no environment / no desk / no monitor / no creator-setup signals. Animation is just face + slight neck. Composited against the bible image's outdoor/indoor background, not a believable streamer-room scene. Motion library is limited. This is "the pipe works" not "the content is good."</div>
   </section>
 
   <section>
     <h2>6. PiP demos (yesterday's batch using Mason headshot directly)</h2>
-    <p class="lede">8 reaction clips spliced into source videos in the SniperWolf PiP format. These were made BEFORE we had the FLUX bibles (the talking head is just <span class="mono">mason_goth.jpeg</span> animated by EchoMimic on each audio). Useful to feel the format; the next batch will use the bible images for more shot variety.</p>
+    <p class="lede">8 reaction clips spliced into source videos in the SniperWolf PiP format. These were made BEFORE we had the FLUX bibles (the talking head is just <span class="mono">mason_goth.jpeg</span> animated by EchoMimic on each audio). <strong>These are scratch demos to feel the format and confirm the splice plumbing works — not anywhere near production quality.</strong> The talking head is a static portrait against a plain background; a real product needs the character in a creator setup (room, desk, lighting matching the source clip's energy, etc.).</p>
 
     <div class="vid-grid" id="grid-spliced"></div>
 
