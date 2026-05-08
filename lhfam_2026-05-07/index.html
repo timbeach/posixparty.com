@@ -421,14 +421,49 @@
     <div class="callout warn"><strong>What we should NOT do until D1-D6 (from the May-5 page) are settled:</strong> production-scale batch generation. Today's run validates the H100 stack; D1-D6 still need the team to weigh in on character direction, voice strategy, aesthetic, and quality bar before we light up the pod for an 8-hour batch.</div>
   </section>
 
-  <!-- 8. Resources -->
+  <!-- 8. ops continuity -->
   <section>
-    <h2>8. resources</h2>
+    <h2>8. ops continuity &mdash; VPS infrastructure backup</h2>
+    <p class="lede">Late-night follow-on: now that we have the HF Pro storage wired up, used the same chunked upload pattern to back up both VPS hosts (vultr — production sites, posixparty/timbeach/aegixlinux/etc · timothason — small VPS with mason's source) to a third HF bucket.</p>
+
+    <table>
+      <thead><tr><th>host</th><th>tarball</th><th>chunks</th><th>contents</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">vultr</span> (45.32.216.23)</td><td>5.5GB gzipped</td><td>12 × 500MB</td><td><span class="mono">/etc/{nginx,letsencrypt,…}</span> · <span class="mono">/var/www</span> · <span class="mono">/home</span> · <span class="mono">/root</span></td></tr>
+        <tr><td><span class="mono">timothason</span> (155.138.213.136)</td><td>238MB gzipped</td><td>1 × 238MB</td><td>same path set</td></tr>
+      </tbody>
+    </table>
+
+    <h3>three private HF buckets now in use</h3>
+    <table>
+      <thead><tr><th>bucket</th><th>size</th><th>files</th><th>purpose</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">timbeach/lhfam-models</span></td><td>143 GB</td><td>244</td><td>FLUX/PuLID/EchoMimic/Wan2.2-S2V/InfiniteYou model weights</td></tr>
+        <tr><td><span class="mono">timbeach/lhfam-outputs</span></td><td>~6 MB</td><td>18</td><td>red-lipstick bible · EchoMimic + Wan2.2-S2V mp4s · voice ref · chatterbox wav</td></tr>
+        <tr><td><span class="mono">timbeach/vps-backups</span></td><td>~6 GB</td><td>15</td><td>vultr + timothason snapshots, chunked + sha256-verified</td></tr>
+      </tbody>
+    </table>
+    <p>Total HF Pro consumption: <strong>~149 GB / 1024 GB</strong>. $9/mo storage, near-instant restore via Xet content-addressable dedup.</p>
+
+    <h3>scripts</h3>
+    <ul>
+      <li><span class="mono">VULTR_0/backup-host-to-hf.sh &lt;ssh-host&gt;</span> — tar/split/sha256/sync in one. Re-runnable.</li>
+      <li><span class="mono">VULTR_0/restore-host-from-hf.sh &lt;ssh-host&gt; &lt;date&gt;</span> — pull chunks back, verify manifest, reassemble tarball.</li>
+    </ul>
+
+    <div class="callout warn"><strong>Discovery: hf 1.8.0 client hangs on large single-file uploads</strong> via <span class="mono">hf buckets cp</span> or <span class="mono">hf buckets sync</span>. Connection ends up in CLOSE_WAIT, the python process keeps the socket open and never recovers. Workaround that ships in <span class="mono">backup-host-to-hf.sh</span>: split tarballs into 500MB chunks before upload — many small files upload reliably with parallel transfers, the same way our 67.5GB of model files did earlier today.</div>
+  </section>
+
+  <!-- 9. Resources -->
+  <section>
+    <h2>9. resources</h2>
     <ul>
       <li>Last review (May 5): <a href="../lhfam_2026-05-05/">posixparty.com/lhfam_2026-05-05</a> — voice bake-off, 4 character bibles, 8 PiP demos, D1-D6 open decisions</li>
       <li>Repo: <span class="mono">github.com/LHFAM/LHFAM</span> · branch <span class="mono">development-timothy</span></li>
-      <li>Key new docs added today: <span class="mono">scripts/install_h100_full.sh</span>, <span class="mono">scripts/hf_backup.sh</span></li>
-      <li>HF buckets (private): <span class="mono">timbeach/lhfam-models</span> (67.5GB), <span class="mono">timbeach/lhfam-outputs</span> (empty so far)</li>
+      <li>Key scripts added today: <span class="mono">scripts/install_h100_full.sh</span>, <span class="mono">scripts/hf_backup.sh</span></li>
+      <li>For Mason specifically: <span class="mono">docs/2026-05-07-mason-update-h100-rebuild.md</span> — full technical recap + per-stage prompt-engineering experiment ideas</li>
+      <li>For posixparty page deploy: <span class="mono">VULTR_0/sites/posixparty.com/docs/deploying-team-review-pages.md</span></li>
+      <li>HF buckets (private): <span class="mono">timbeach/lhfam-models</span> (143GB), <span class="mono">timbeach/lhfam-outputs</span> (6MB), <span class="mono">timbeach/vps-backups</span> (6GB)</li>
     </ul>
   </section>
 
