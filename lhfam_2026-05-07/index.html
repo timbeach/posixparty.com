@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>LHFAM Progress · 2026-05-07</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0e0a;
+      --fg: #3CB371;
+      --hl: #FFD700;
+      --dim: rgba(60, 179, 113, 0.5);
+      --border: rgba(60, 179, 113, 0.2);
+      --warn: #ff9966;
+      --ok: #6fdc8c;
+      --bad: #ff5e5e;
+    }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* Password gate */
+    #gate {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 1.5rem;
+      padding: 2rem;
+    }
+    #gate h2 { color: var(--hl); font-size: 1.4rem; font-weight: 400; }
+    #gate p { color: var(--dim); font-size: 0.95rem; max-width: 30rem; text-align: center; }
+    #gate input {
+      background: transparent;
+      border: 1px solid var(--fg);
+      color: var(--fg);
+      font-family: inherit;
+      font-size: 1.1rem;
+      padding: 0.7rem 1rem;
+      border-radius: 3px;
+      min-width: 18rem;
+      text-align: center;
+    }
+    #gate input:focus { outline: none; border-color: var(--hl); box-shadow: 0 0 8px rgba(255,215,0,0.4); }
+    #gate .err { color: var(--bad); font-size: 0.85rem; min-height: 1em; }
+    #gate .hint { color: var(--dim); font-size: 0.8rem; }
+
+    body.locked { overflow: hidden; }
+    body:not(.unlocked) main { display: none; }
+
+    header {
+      padding: 2rem 2rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header .crumb { color: var(--dim); font-size: 0.85rem; margin-bottom: 0.4rem; }
+    header h1 { color: var(--hl); font-size: 1.6rem; font-weight: 400; margin-bottom: 0.4rem; }
+    header .sub { color: var(--fg); font-size: 0.95rem; opacity: 0.8; }
+    header .meta { margin-top: 0.8rem; font-size: 0.78rem; color: var(--dim); }
+    main { padding: 1rem 2rem 4rem; max-width: 1400px; margin: 0 auto; }
+
+    section { margin-top: 2.5rem; }
+    section h2 {
+      color: var(--hl);
+      font-size: 1.2rem; font-weight: 400;
+      margin-bottom: 0.6rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    section h3 { color: var(--fg); font-size: 1.0rem; font-weight: 400; margin: 1.2rem 0 0.5rem; }
+    section p { margin-bottom: 0.8rem; max-width: 64rem; }
+    section .lede { color: var(--hl); opacity: 0.9; font-size: 1.0rem; margin-bottom: 1rem; max-width: 64rem; }
+    section ul, section ol { margin: 0.4rem 0 0.8rem 1.4rem; }
+    section li { margin-bottom: 0.3rem; }
+
+    section .callout {
+      border-left: 2px solid var(--hl);
+      padding: 0.6rem 1rem;
+      background: rgba(255,215,0,0.06);
+      margin: 1rem 0;
+      max-width: 64rem;
+    }
+    section .callout.warn { border-color: var(--warn); background: rgba(255,153,102,0.08); }
+    section .callout.bad  { border-color: var(--bad);  background: rgba(255,94,94,0.08); }
+    section .callout.ok   { border-color: var(--ok);   background: rgba(111,220,140,0.08); }
+
+    /* TL;DR cards */
+    .tldr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.6rem;
+      margin: 0.8rem 0 1.5rem;
+    }
+    .tldr-card {
+      border: 1px solid var(--border);
+      padding: 0.7rem 0.9rem;
+      background: rgba(60,179,113,0.04);
+    }
+    .tldr-card .h { color: var(--hl); font-size: 0.85rem; margin-bottom: 0.3rem; }
+    .tldr-card .v { color: var(--fg); font-size: 0.95rem; }
+    .tldr-card .v.ok { color: var(--ok); }
+
+    /* Bible grids */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 0.5rem;
+      margin: 0.8rem 0 1rem;
+    }
+    .grid.tight { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .card {
+      border: 1px solid var(--border);
+      cursor: zoom-in;
+      transition: border-color 0.15s;
+    }
+    .card:hover { border-color: var(--hl); }
+    .card img { display: block; width: 100%; height: auto; }
+    .card .cap {
+      padding: 0.3rem 0.5rem;
+      font-size: 0.78rem;
+      color: var(--dim);
+      border-top: 1px solid var(--border);
+    }
+
+    /* Video grid */
+    .vid-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 0.8rem;
+      margin: 0.8rem 0 1rem;
+    }
+    .vid-grid > div { border: 1px solid var(--border); }
+    .vid-grid video { display: block; width: 100%; max-width: 100%; }
+    .vid-grid .vcap {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.85rem;
+      color: var(--fg);
+      border-top: 1px solid var(--border);
+    }
+
+    /* Comparison stat row */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin: 0.8rem 0 1rem;
+    }
+    .compare .col {
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.9rem;
+      background: rgba(60,179,113,0.04);
+    }
+    .compare .col h4 { color: var(--hl); font-size: 0.95rem; font-weight: 400; margin-bottom: 0.4rem; }
+    .compare .col p { font-size: 0.85rem; margin-bottom: 0.3rem; }
+    .compare .col .stat { color: var(--ok); }
+    .compare .col .stat.bad { color: var(--bad); }
+    @media (max-width: 720px) { .compare { grid-template-columns: 1fr; } }
+
+    /* Tables */
+    table { border-collapse: collapse; margin: 0.8rem 0; max-width: 64rem; width: 100%; }
+    th, td { text-align: left; padding: 0.4rem 0.7rem; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+    th { color: var(--hl); font-weight: 400; }
+    td.r { text-align: right; }
+    td .mono { color: var(--fg); }
+
+    /* Lightbox */
+    #lb {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 8000;
+      display: none;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 0.5rem;
+      padding: 2rem;
+    }
+    #lb.open { display: flex; }
+    #lb img { max-width: 95vw; max-height: 90vh; }
+    #lb .lb-cap { color: var(--dim); font-size: 0.85rem; }
+
+    .mono { font-family: 'Share Tech Mono', monospace; }
+
+    .footer-cmd {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      color: var(--dim);
+      font-size: 0.85rem;
+    }
+    .footer-cmd .pp { color: var(--ok); }
+    .footer-cmd .blink { animation: blink 1s steps(2) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+  </style>
+</head>
+<body class="locked">
+
+<div id="gate">
+  <h2>lhfam · team review</h2>
+  <p>Internal preview — not for sharing outside the team.</p>
+  <input id="pwd" type="password" placeholder="passphrase" autofocus />
+  <div class="err" id="gerr"></div>
+  <div class="hint">hint: have chicken with jello</div>
+</div>
+
+<header>
+  <div class="crumb">posixparty.com / lhfam_2026-05-07</div>
+  <h1>LHFAM · H100 rebuild + Wan2.2-S2V comparison</h1>
+  <div class="sub">2026-05-07 — One-day push: stand up a fresh H100 + 500GB network volume from scratch with a single command, regenerate the Mason bible with red lipstick, and run our first 14B-parameter quality experiment against the existing EchoMimic V3 baseline.</div>
+  <div class="meta">single H100 SXM 80GB session · ~4 hours total · ~$12 spend</div>
+</header>
+
+<main>
+
+  <!-- 1. TL;DR -->
+  <section>
+    <h2>1. tl;dr</h2>
+    <p class="lede">Old 4090 pod died (500MB OOM). Provisioned a fresh H100 SXM 80GB with a brand-new 500GB network volume. Wrote a single-command installer that brings the entire stack up in ~50 min. Pushed all model weights to a private HuggingFace bucket as insurance. Regenerated the Mason character bible with red lipstick (per Tim's request) and produced our first Wan2.2-S2V-14B side-by-side against EchoMimic V3.</p>
+
+    <div class="tldr-grid">
+      <div class="tldr-card"><div class="h">pod</div><div class="v ok">H100 SXM 80GB · ~$2.99/hr</div></div>
+      <div class="tldr-card"><div class="h">storage</div><div class="v ok">500GB volume + HF Pro 1TB</div></div>
+      <div class="tldr-card"><div class="h">install time</div><div class="v ok">~50 min one command</div></div>
+      <div class="tldr-card"><div class="h">backup</div><div class="v ok">67.5GB → HF in 7 min</div></div>
+      <div class="tldr-card"><div class="h">bible regen</div><div class="v ok">12 imgs · ~4 min on H100</div></div>
+      <div class="tldr-card"><div class="h">EchoMimic clip</div><div class="v ok">~4 min wall-clock</div></div>
+      <div class="tldr-card"><div class="h">Wan2.2-S2V clip</div><div class="v ok">~9 min wall-clock</div></div>
+      <div class="tldr-card"><div class="h">cost today</div><div class="v ok">~$12 active GPU</div></div>
+    </div>
+
+    <div class="callout"><strong>Why the rebuild:</strong> the previous 4090 pod (where May 3-5 work happened) was deployed with only 500MB of system RAM and OOM'd. Pod-to-pod migration was unreliable due to RunPod proxy banner pollution, so we wrote off the migration and rebuilt from canonical sources (FLUX-dev, EchoMimic V3, Wan2.2-S2V-14B, InfiniteYou) directly onto a 500GB network volume.</div>
+  </section>
+
+  <!-- 2. Mason bible (red lipstick) -->
+  <section>
+    <h2>2. mason character bible &mdash; red lipstick</h2>
+    <p class="lede">Tim asked: "can we do the mason bible character without black lipstick? can it be red?" Yes. One-line prompt change in <span class="mono">scripts/gen_character_bible_flux.py</span>, regenerated the full 12-image bible. Identity locks across all expressions; goth-leaning aesthetic + black choker preserved on the neutral shots; classic deep red across the board.</p>
+
+    <h3>reference (mason source photo)</h3>
+    <div class="grid tight" style="grid-template-columns: 200px;">
+      <div class="card" data-src="img/mason_flux_redlips/_keyframe.jpg" data-cap="mason_goth.jpeg (PuLID identity reference, resized)"><img loading="lazy" src="img/mason_flux_redlips/_keyframe.jpg" alt="mason source"><div class="cap">mason source (identity ref)</div></div>
+    </div>
+
+    <h3>bible (12 images: 4 expressions × 3 framings)</h3>
+    <div class="grid" id="grid-mason-redlips"></div>
+
+    <div class="callout ok"><strong>Wins:</strong> Red lipstick consistent across all 12. Identity stable. Lighting consistent (golden-hour outdoor backlit). Per-image render dropped from <strong>~22 min on the dead pod's 4090 (with aggressive offload)</strong> to <strong>~30 sec on the H100</strong> once we made the offload flag configurable — 44× speedup. Total bible: ~4 min wall-clock.</div>
+    <div class="callout warn"><strong>Minor inconsistency:</strong> the black choker appears in the neutral shots but drops in the more dynamic poses (laughing/surprised/deadpan). PuLID isn't deterministic about accessories that aren't explicitly demanded by the prompt.</div>
+  </section>
+
+  <!-- 3. A/B talking-head comparison -->
+  <section>
+    <h2>3. talking-head A/B &mdash; EchoMimic V3 Flash vs Wan2.2-S2V-14B</h2>
+    <p class="lede">Same input portrait (<span class="mono">00_neutral_portrait.jpg</span>), same audio (Mason-cloned Chatterbox Turbo, 4-second clip), two models. EchoMimic V3 Flash is what's been carrying our existing pipeline — it's a 1.3B base + flash transformer at 8 inference steps. Wan2.2-S2V-14B is the new H100-tier upgrade — a full 14B speech-to-video model at 40 inference steps.</p>
+
+    <div class="vid-grid">
+      <div>
+        <video controls preload="metadata" src="vid/echomimic_redlips.mp4"></video>
+        <div class="vcap"><strong>EchoMimic V3 Flash</strong> · 768×768 @ 25fps · 4.04s · ~4 min wall-clock</div>
+      </div>
+      <div>
+        <video controls preload="metadata" src="vid/wan22_s2v_redlips.mp4"></video>
+        <div class="vcap"><strong>Wan2.2-S2V-14B</strong> · 576×576 @ 16fps · 4.08s · ~9 min wall-clock</div>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="col">
+        <h4>EchoMimic V3 Flash</h4>
+        <p><span class="stat">faster</span> — ~4 min total per clip on H100</p>
+        <p><span class="stat">higher resolution</span> — 768×768 native</p>
+        <p>1.3B base + flash transformer</p>
+        <p>8 inference steps (teacache + skip-start)</p>
+        <p>Strong default for batch reaction generation</p>
+      </div>
+      <div class="col">
+        <h4>Wan2.2-S2V-14B</h4>
+        <p>~9 min per clip (1:38 model load + 5:36 inference + save)</p>
+        <p>576×576 default for square input · supports up to 1280×720</p>
+        <p>14B params · ~10× larger than EchoMimic Flash</p>
+        <p>40 sample steps · UniPC sampler · guide_scale 4.5</p>
+        <p>SOTA single-shot speech-to-video (per ICCV 2025 / Wan paper)</p>
+      </div>
+    </div>
+
+    <p>Source audio (the Mason-cloned Chatterbox Turbo line driving both videos):</p>
+    <audio controls src="aud/clip_0013_r00.wav" style="margin: 0.5rem 0 1rem 0; width: 100%; max-width: 480px;"></audio>
+
+    <div class="callout"><strong>What to watch for:</strong> mouth shape on the consonants, eye contact, micro-head movements driven by audio energy. Identity should stay locked from the bible portrait — no drift. EchoMimic tends to look more pristine but with smaller motion range; Wan2.2-S2V-14B has noticeably more head/body motion and the mouth opens wider on vowels. Lower resolution on Wan2.2 is the default size mismatch (square input → 576×576 default); we can request 832×480 or 1280×720 explicitly for higher-fidelity outputs at the cost of more inference time.</div>
+    <div class="callout warn"><strong>Caveats:</strong> this is a single 4-second clip per model on the same input. Not a real evaluation yet — just first-light. Real evaluation needs 5-10 clips per model across the bible (different expressions, different audio energies) before we can call a winner. Both videos are floating busts against the bible-image background, not character-in-room compositions — same POC framing as the May-5 demos.</div>
+  </section>
+
+  <!-- 4. Infrastructure -->
+  <section>
+    <h2>4. infrastructure rebuild &mdash; one command</h2>
+    <p class="lede">The whole point of today's work: from "I provisioned a fresh H100 pod" to "the entire model stack is installed, the buckets are wired up, and FLUX/PuLID smoke-tests pass" should take one command and ~50 minutes of unsupervised wall-clock.</p>
+
+    <h3>what gets installed</h3>
+    <table>
+      <thead><tr><th>component</th><th>where</th><th>size</th></tr></thead>
+      <tbody>
+        <tr><td>FLUX-dev BF16 + PuLID-FLUX adapter + antelopev2 face encoder</td><td><span class="mono">/workspace/PuLID</span> + <span class="mono">/workspace/hf_cache</span></td><td>~56GB</td></tr>
+        <tr><td>EchoMimic V3 Flash (Wan2.1-Fun base + transformer + chinese-wav2vec2)</td><td><span class="mono">/workspace/echomimic_v3</span></td><td>~24GB</td></tr>
+        <tr><td>Wan2.2-S2V-14B (4-shard transformer + Wan2.1 VAE + T5 + wav2vec2-XLSR)</td><td><span class="mono">/workspace/Wan2.2-S2V-14B</span></td><td>~46GB</td></tr>
+        <tr><td>InfiniteYou (aes_stage2 + deps)</td><td><span class="mono">/workspace/InfiniteYou</span></td><td>~20GB</td></tr>
+        <tr><td>Five isolated venvs (FLUX/EchoMimic, Wan2.2, Chatterbox, Kokoro, hf-CLI)</td><td><span class="mono">/opt/venv-{id,wan,chat,kokoro,hf}</span></td><td>~25GB on container disk</td></tr>
+      </tbody>
+    </table>
+
+    <h3>how the install runs</h3>
+    <p>Single bash entry point with idempotent steps and a hard requirement on <span class="mono">$HF_TOKEN</span>:</p>
+    <ul>
+      <li><span class="mono">scripts/install_h100_full.sh --full</span> on a fresh pod ≈ 50 min unsupervised</li>
+      <li>HF Xet backend handles the big model downloads (gigabytes per second on Pro tier)</li>
+      <li>End of run: PuLID-FLUX import smoke-test, HF buckets created (<span class="mono">lhfam-models</span>, <span class="mono">lhfam-outputs</span>), all five venvs verified</li>
+      <li>Pinned to <span class="mono">development-timothy</span> branch of LHFAM repo</li>
+    </ul>
+
+    <h3>backup story (HF buckets)</h3>
+    <p>HuggingFace Pro ($9/mo) gives 1TB private storage with Xet content-addressable dedup. We push the entire <span class="mono">/workspace/{PuLID,echomimic_v3,Wan2.2-S2V-14B,InfiniteYou,hf_cache}</span> set to a private bucket with one command:</p>
+    <ul>
+      <li><span class="mono">scripts/hf_backup.sh push-models</span> — mirror models to bucket</li>
+      <li><span class="mono">scripts/hf_backup.sh push-outputs</span> — append outputs (no <span class="mono">--delete</span>)</li>
+      <li><span class="mono">scripts/hf_backup.sh restore-all</span> — disaster recovery onto a new pod</li>
+    </ul>
+    <p>Today's first push: <strong>67.5GB in ~7 minutes</strong>. Re-pushes are near-instant via Xet dedup. This means we can lose any pod (or stop one to save GPU $) and rebuild from canonical bucket state in ~10-15 min instead of re-downloading from public HF.</p>
+
+    <div class="callout ok"><strong>Why this matters:</strong> the May 4-5 work was bottlenecked by 8+ hours of cumulative model downloading every time a pod broke. Today's installer + HF buckets reduces that to a 10-15 min restore. We can now iterate on GPU sizing (4090 ↔ H100 ↔ H200) without losing a half-day to setup each time.</div>
+  </section>
+
+  <!-- 5. Bugs caught -->
+  <section>
+    <h2>5. bugs caught + fixed in the installer</h2>
+    <p class="lede">First H100 install hit four real issues. All fixed in commits to <span class="mono">development-timothy</span> so the next clean pod brings up cleanly.</p>
+
+    <table>
+      <thead><tr><th>bug</th><th>commit</th><th>fix</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>aggressive_offload=True hardcoded in bible script — kills H100 perf (GPU stuck at 7%, 22 min/img)</td>
+          <td><span class="mono">30d8e9e</span></td>
+          <td>Added <span class="mono">--offload</span> / <span class="mono">--aggressive-offload</span> CLI flags, default off</td>
+        </tr>
+        <tr>
+          <td>Wan2.2-S2V install silently skipped weights download — flash_attn build failed before snapshot_download could run</td>
+          <td><span class="mono">21a2c17</span></td>
+          <td>Install torch + huggingface_hub in venv-wan FIRST, filter flash_attn out of requirements</td>
+        </tr>
+        <tr>
+          <td>HF CLI install upgraded huggingface_hub to 1.x in venv-id, breaking transformers 4.48 (requires &lt;1.0)</td>
+          <td><span class="mono">21a2c17</span></td>
+          <td>Dedicated <span class="mono">/opt/venv-hf</span> for hf CLI; venv-id keeps compatible hub version</td>
+        </tr>
+        <tr>
+          <td>Wan2.2 S2V code path bypasses dispatcher → hard-asserts on FLASH_ATTN_2_AVAILABLE → SDPA fallback never runs</td>
+          <td><span class="mono">0e62c74</span></td>
+          <td>Install matching <em>prebuilt</em> flash-attn wheel (cu12torch2.6 cxx11abiFALSE cp311) — no source build, ABI-correct</td>
+        </tr>
+        <tr>
+          <td>Wan2.2 generate.py logs "ERROR: ffmpeg not found" then quietly produces audio-less mp4</td>
+          <td><span class="mono">fd9baf4</span></td>
+          <td><span class="mono">apt-get install ffmpeg</span> early in the installer</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 6. Cost & infrastructure -->
+  <section>
+    <h2>6. cost</h2>
+
+    <h3>today's spend</h3>
+    <table>
+      <thead><tr><th>line item</th><th>rate</th><th>amount</th><th>cost</th></tr></thead>
+      <tbody>
+        <tr><td>H100 SXM 80GB · install + bible regen + EchoMimic test + Wan2.2-S2V test</td><td>$2.99/hr</td><td>~4 hr active</td><td>~$11.96</td></tr>
+        <tr><td>500GB network volume · today's prorated</td><td>$0.07/GB/mo</td><td>4 hr</td><td>~$0.19</td></tr>
+        <tr><td>HF Pro · today's prorated</td><td>$9/mo</td><td>1 day</td><td>~$0.30</td></tr>
+        <tr><td colspan="3"><strong>total today</strong></td><td><strong>~$12.45</strong></td></tr>
+      </tbody>
+    </table>
+
+    <h3>ongoing (whether pod runs or not)</h3>
+    <table>
+      <tbody>
+        <tr><td>500GB network volume · idle storage</td><td class="r">$35/mo</td></tr>
+        <tr><td>HF Pro · 1TB private bucket storage</td><td class="r">$9/mo</td></tr>
+        <tr><td><strong>monthly fixed</strong></td><td class="r"><strong>$44/mo</strong></td></tr>
+      </tbody>
+    </table>
+
+    <h3>variable (when GPU is running)</h3>
+    <table>
+      <tbody>
+        <tr><td>H100 SXM 80GB · active</td><td class="r">$2.99/hr</td></tr>
+        <tr><td>(historic 4090 baseline · for comparison)</td><td class="r">~$0.70/hr</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout"><strong>Cumulative project spend (May 3-7):</strong> ~$15 (May 3-5 on 4090) + ~$12 today (H100) ≈ <strong>$27 of GPU compute</strong> across 5 days of work. Ongoing $44/mo for storage is now the baseline — we can pause GPU between sessions and only pay for storage.</div>
+  </section>
+
+  <!-- 7. What's next -->
+  <section>
+    <h2>7. what's next</h2>
+    <p class="lede">Concrete next moves, in priority order. Most are 1-2 hours of GPU each.</p>
+
+    <ol>
+      <li><strong>Real EchoMimic vs Wan2.2-S2V evaluation.</strong> Take 5 expressions from the new bible × 5 audio clips of varying energy → 25 talking-head clips per model = 50 total. Same audio across both models for direct A/B. Total GPU: ~50 clips × 6 min avg = 5 hours, ~$15.</li>
+      <li><strong>Higher-resolution Wan2.2-S2V outputs.</strong> Today's runs were the 576×576 default (square input). Wan2.2 supports 832×480, 1280×720, 1280×704. Worth burning a few clips at 1280×720 to see if quality justifies the longer render time.</li>
+      <li><strong>Test the full pipeline end-to-end on the new stack.</strong> Source clip → reaction line → Chatterbox audio → Wan2.2-S2V talking head → ffmpeg PiP splice. May 5 had this for EchoMimic; we should re-run it on Wan2.2-S2V output to see if PiP composition reveals any new artifacts.</li>
+      <li><strong>InfiniteYou as identity injector.</strong> Pre-installed but not yet tested. Per ICCV 2025 it has 80% win rate against PuLID-FLUX for identity preservation. Easy 1-hour experiment: same prompt grid as the bible but with InfiniteYou instead of PuLID.</li>
+      <li><strong>Wan2.2-Animate-14B</strong> (character replacement on existing video). Different beast — takes a source video + reference photo, swaps the person. Could be the path to "Mason in a real creator-room setup" without needing to compose backgrounds ourselves.</li>
+    </ol>
+
+    <div class="callout warn"><strong>What we should NOT do until D1-D6 (from the May-5 page) are settled:</strong> production-scale batch generation. Today's run validates the H100 stack; D1-D6 still need the team to weigh in on character direction, voice strategy, aesthetic, and quality bar before we light up the pod for an 8-hour batch.</div>
+  </section>
+
+  <!-- 8. Resources -->
+  <section>
+    <h2>8. resources</h2>
+    <ul>
+      <li>Last review (May 5): <a href="../lhfam_2026-05-05/">posixparty.com/lhfam_2026-05-05</a> — voice bake-off, 4 character bibles, 8 PiP demos, D1-D6 open decisions</li>
+      <li>Repo: <span class="mono">github.com/LHFAM/LHFAM</span> · branch <span class="mono">development-timothy</span></li>
+      <li>Key new docs added today: <span class="mono">scripts/install_h100_full.sh</span>, <span class="mono">scripts/hf_backup.sh</span></li>
+      <li>HF buckets (private): <span class="mono">timbeach/lhfam-models</span> (67.5GB), <span class="mono">timbeach/lhfam-outputs</span> (empty so far)</li>
+    </ul>
+  </section>
+
+  <div class="footer-cmd">
+    <span class="pp">posixparty@kingsport:~/lhfam_2026-05-07$</span> _<span class="blink">|</span><br>
+    pod stopped after this run · 500GB volume preserves all weights · HF buckets mirror models for disaster recovery
+  </div>
+</main>
+
+<!-- Lightbox -->
+<div id="lb"><img id="lbimg" alt=""><div class="lb-cap" id="lbcap"></div></div>
+
+<script>
+  // Password gate
+  const PWD = 'havechickenwithjello';
+  const gate = document.getElementById('gate');
+  const pwd = document.getElementById('pwd');
+  const gerr = document.getElementById('gerr');
+  function tryUnlock(p) {
+    if (p === PWD || sessionStorage.getItem('lhfam_unlocked') === '1') {
+      sessionStorage.setItem('lhfam_unlocked', '1');
+      gate.style.display = 'none';
+      document.body.classList.remove('locked');
+      document.body.classList.add('unlocked');
+    } else {
+      gerr.textContent = '✗ wrong passphrase';
+      pwd.value = '';
+      pwd.focus();
+    }
+  }
+  if (sessionStorage.getItem('lhfam_unlocked') === '1') tryUnlock(PWD);
+  pwd.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') tryUnlock(pwd.value);
+  });
+
+  // Bible image grid (12 imgs: 4 expressions × 3 framings)
+  const expr = ['neutral','neutral','neutral','surprised','surprised','surprised','laughing','laughing','laughing','deadpan','deadpan','deadpan'];
+  const fram = ['portrait','shoulders','halfbody','portrait','shoulders','halfbody','portrait','shoulders','halfbody','portrait','shoulders','halfbody'];
+  function buildGrid(elId, dir) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    let html = '';
+    for (let i = 0; i < 12; i++) {
+      const n = String(i).padStart(2, '0');
+      const f = `${n}_${expr[i]}_${fram[i]}.jpg`;
+      html += `<div class="card" data-src="${dir}/${f}" data-cap="${expr[i]} × ${fram[i]}"><img loading="lazy" src="${dir}/${f}" alt="${expr[i]} ${fram[i]}"><div class="cap">${expr[i]} × ${fram[i]}</div></div>`;
+    }
+    el.innerHTML = html;
+  }
+  buildGrid('grid-mason-redlips', 'img/mason_flux_redlips');
+
+  // Lightbox
+  const lb = document.getElementById('lb');
+  const lbimg = document.getElementById('lbimg');
+  const lbcap = document.getElementById('lbcap');
+  document.addEventListener('click', (e) => {
+    const card = e.target.closest('.card');
+    if (card && card.dataset.src) {
+      lbimg.src = card.dataset.src;
+      lbcap.textContent = card.dataset.cap || '';
+      lb.classList.add('open');
+    } else if (e.target === lb || e.target === lbimg) {
+      lb.classList.remove('open');
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') lb.classList.remove('open');
+  });
+</script>
+
+</body>
+</html>
